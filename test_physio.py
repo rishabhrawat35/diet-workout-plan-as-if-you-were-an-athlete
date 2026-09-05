@@ -155,7 +155,8 @@ class NoPersona(unittest.TestCase):
     """Nothing in the engine may be shaped around one individual."""
 
     CODE = ("physio.py", "coherence.py", "blocks.py", "contract.py",
-            "myths.py", "resolve.py", "audit.py", "render.py")
+            "myths.py", "resolve.py", "audit.py", "render.py",
+            "SKILL.md", "README.md")
 
     def test_no_personal_identifier_appears_in_any_module(self):
         banned = ("rira", "rishabh", "onsurity", "bangalore", "provilac",
@@ -190,6 +191,39 @@ class NoPersona(unittest.TestCase):
         self.assertLess(P.deload_every_weeks(b), 8)
         self.assertIn("overhead barbell press",
                       [m for m, _ in P.banned_movements(b)])
+
+
+class Skill(unittest.TestCase):
+    """The skill file is the only entry point most people will ever use."""
+
+    def setUp(self):
+        with open(os.path.join(HERE, "SKILL.md")) as fh:
+            self.s = fh.read()
+
+    def test_it_has_frontmatter_with_a_name_and_description(self):
+        self.assertTrue(self.s.startswith("---"))
+        head = self.s.split("---")[1]
+        self.assertIn("name:", head)
+        self.assertIn("description:", head)
+
+    def test_it_tells_claude_not_to_guess_the_intake(self):
+        low = self.s.lower()
+        self.assertIn("do not guess", low)
+
+    def test_every_command_it_gives_actually_runs(self):
+        import re
+        for cmd in re.findall(r"python3 (\w+\.py)", self.s):
+            self.assertTrue(os.path.exists(os.path.join(HERE, cmd)),
+                            f"SKILL.md references {cmd}, which does not exist")
+
+    def test_it_names_the_private_prefix_that_gitignore_protects(self):
+        self.assertIn("private-", self.s)
+        with open(os.path.join(HERE, ".gitignore")) as fh:
+            self.assertIn("private-", fh.read())
+
+    def test_it_carries_the_refusal_rule(self):
+        for t in ("18", "pregnant", "postpartum", "65"):
+            self.assertIn(t, self.s)
 
 
 class EndToEnd(unittest.TestCase):
