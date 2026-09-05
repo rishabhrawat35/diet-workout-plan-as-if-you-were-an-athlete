@@ -1,142 +1,42 @@
-# Trainer
+# 🏋️ Trainer
 
 **A gym and diet plan that gets reviewed before it reaches you.**
 
-Most plans are written once and handed over. This one gets written, then checked from four different angles — what a doctor would refuse to allow, what a dietitian would insist on, what a coach would notice, and what a person actually eating it would say. Anything that fails gets fixed and re-checked.
-
-You only see the version that survived.
-
 Runs on your laptop. No account, no subscription, no internet needed.
 
----
+<p align="center">
+  <img src="docs/real-plan-1.png" width="420" alt="Page one: the training week, every exercise with sets and reps">
+  <img src="docs/real-plan-2.png" width="420" alt="Page two: food with quantities, supplements, the 24 week calendar, and what to measure">
+</p>
 
-## Why this exists
-
-AI chats are good at writing plans that look right. They are not built to check them.
-
-| AI chats tell you | What they cannot know |
-|---|---|
-| "Eat 2,200 calories a day" | They did not ask your height, your job, or how much you walk, so the number is a starting guess rather than yours. |
-| "Here is your personalised plan" | Your name is on top. Underneath is the plan everyone gets. |
-| "Breakfast: 2 roti, 3 boiled eggs, salad" | The calories and protein are right. But people don't eat roti with just boiled eggs — there is nothing to eat it with. Nothing told the model that, so it could not know. |
-| "12 week programme" | There is no rest week in it. Recovery is not something a text model tracks across twelve weeks. |
-| "6 exercises for your calves" | Four need machines your gym may not have. It never asked what is in your gym. |
-| "This food helps burn belly fat" | No food does this. It repeated something common on the internet. |
-
-None of this is carelessness. A chat has no way to test its own answer. **So you find out in month three.**
+<p align="center"><i>👆 This is the whole thing. A real plan someone is following, name blacked out, nothing else changed.</i></p>
 
 ---
 
-## What it checks, and who it checks like
+## 📄 What you get
 
-Four review layers run over every plan. They look at different things and they disagree, which is the point.
+**Pages 1 and 2 — what to do.** Print these two and put them on your desk.
 
-### 1. What a doctor would stop
+- Every exercise, sets and reps, for each day of the week
+- Every meal with real quantities: 2 roti, 1 katori dal, 250 ml milk
+- Supplements, doses, and what time of day
+- All 24 weeks, and what changes in each block
+- What to measure, how often, and what to do when the number moves
 
-| | |
-|---|---|
-| Refuses to plan at all | Under 18 · pregnant · under 12 weeks after giving birth · over 65 without a doctor's clearance |
-| Removes movements | 8 injury patterns mapped to 23 specific exercises, each with the reason it would aggravate |
-| Sends you to a clinician | For things a diet genuinely cannot fix, instead of planning around them |
-| Flags an injury it does not recognise | Rather than staying silent about it |
+**Pages 3 and 4 — why.** For when you want to check something.
 
-### 2. What a dietitian would insist on
+- Where every number came from
+- How strong the evidence is behind each rule
+- 19 things you have heard about training and diet, and whether they are true
+- What a plan cannot fix, and what to see a doctor about
 
-| | |
-|---|---|
-| Protein | A floor that rises with age, and again when you are dieting |
-| Protein per meal | There is a point past which more in one sitting stops helping |
-| Fat, fibre, water | Minimums, not suggestions |
-| Weight loss speed | Capped, because faster costs you muscle |
-| Missing nutrients | 5 checks on what your food pattern does not supply, with a food fix before a supplement |
-| Food safety | Whether what you carry will still be safe by the time you eat it, based on your weather and storage |
-
-### 3. What a coach would notice
-
-| | |
-|---|---|
-| Sets per muscle per week | A floor and a ceiling, both moving with your training experience |
-| Priority muscles | Get a higher floor, or they were never really a priority |
-| Session length | Sets multiplied by how long a set takes in *your* gym, against the time you have |
-| Exercise order | Two heavy lifts back to back means the second one is done tired |
-| Equipment | An exercise needing a machine you do not have is removed, not suggested |
-| Rest weeks | Required, spaced by your age and sleep |
-
-### 4. What you would say
-
-| | |
-|---|---|
-| Is this a meal | Roti with nothing to eat it with is not breakfast, whatever the numbers say |
-| Would you eat it | A day of boiled eggs and plain salad does not survive 24 weeks |
-| Is it the same every day | Boredom ends more plans than physiology does |
-| Do the foods go together | Correct macros from three unrelated cuisines is not dinner |
-
-### And two rules over the top
-
-**Nothing gets sold to you.** 12 phrases can never appear in a plan — "spot reduce", "boosts testosterone", "burns belly fat", "detox" and others. 19 common claims ship with a straight answer and how strong the evidence is.
-
-**Nothing is left out quietly.** 23 sections are required. If the supplements or the warm-up go missing, the plan is rejected rather than delivered short.
+There is nothing else. No app to open, no streak to maintain, no notifications.
 
 ---
 
-## How it runs
+## 🎯 It is built around you, not a template
 
-```
-   You answer 20 questions
-            │
-            ▼
-   A rough plan is written
-            │
-            ▼
-   ┌──▶ All four layers review it
-   │        │
-   │        ├── nothing wrong ──▶ your document
-   │        │
-   │        ├── it should refuse ──▶ told to see a doctor, no plan
-   │        │
-   │        └── problems found
-   │                 │
-   └────── fixed in severity order
-```
-
-There are 8 severity levels. A problem lower down can never be fixed by causing one higher up.
-
-```
-1  Refuse             you are pregnant, or your gym has no leg press
-2  Food safety        the chicken will spoil before lunch
-3  Minimums           not enough protein, not enough sets, losing weight too fast
-4  Time and maths     the session does not fit in an hour
-5  Is it a meal       roti with nothing to eat it with
-6  Spreading protein  all of it in one sitting
-7  Boredom            the same food every single day
-8  Do you like it     you will not eat this for 24 weeks
-```
-
-It will not fix "this is boring" by telling you to carry food that spoils.
-
----
-
-## What it catches
-
-Real numbers from real plans, and what each one would have done to you.
-
-| The mistake | Why it happened | What it would have cost you |
-|---|---|---|
-| 1 teaspoon of oil counted in your sabji | A real kitchen uses about 3 | 210 extra calories a day, invisible. Six months of that is losing 5 kg instead of 9. |
-| "Glutes are a priority muscle" | Given 10 sets a week; the minimum is 12 | Six months of training glutes and wondering why nothing changed. |
-| "60 minute sessions" | Four of five actually needed 71 to 78 minutes | Late for work every day, or quietly skipping the last two exercises. |
-| "Diet break in week 12" | Training had its easy weeks at 11 and 18 | Eating more during your hardest week, dieting through your easiest. |
-| One calorie formula for everyone | It was the male version | Every woman told to eat 166 calories a day more than she needs. |
-| "2 roti, 3 boiled eggs, salad" | Calories and protein both correct | You would have stopped in a week, and blamed yourself. |
-| A ranking bug | "This food will spoil" scored as less serious than "this food is boring" | Being told to carry cooked chicken that sits at 30°C for eight hours. |
-
-Every one is now a test. None of them can come back.
-
----
-
-## What gets personalised
-
-Not a template with your name on it. Nineteen things about you change the numbers:
+Nineteen things about you change the numbers:
 
 | About you | What it changes |
 |---|---|
@@ -160,7 +60,7 @@ Not a template with your name on it. Nineteen things about you change the number
 | Which proteins you eat | What the meals are built from |
 | How much oil your kitchen uses | Whether your calorie number is real |
 
-### Two people, run through it
+### 👥 The same code, two different people
 
 | | Man, 30, 80 kg, gym 5 days | Woman, 52, 68 kg, gym 3 days |
 |---|---|---|
@@ -178,9 +78,9 @@ Same code. No branches for "man" or "woman". Every number comes out of the answe
 
 ---
 
-## Using it in Claude
+## 🤖 Get your own — 6 steps
 
-This is the easiest way. You never open a terminal after the first step.
+You never open a terminal after step 1.
 
 ### Step 1 — get the files onto your computer
 
@@ -218,62 +118,153 @@ Open Claude and type `/` — `trainer` should appear in the list. If it does not
 
 ### Step 4 — ask for a plan
 
-Say any of these:
-
 - "build me a training and diet plan"
 - "make me a gym plan, I have 5 days and about an hour"
 - "review the diet plan I'm currently following"
 
 ### Step 5 — answer the questions
 
-Claude asks 20 things: your measurements, your gym, your injuries, what you eat, where you keep lunch. **Answer honestly rather than aspirationally** — if you will realistically train 4 days, say 4, not 6. Every answer changes the numbers, and "whatever you think" gets you the generic plan you were trying to avoid.
+Claude asks 20 things: your measurements, your gym, your injuries, what you eat, where you keep lunch.
+
+**Answer honestly rather than aspirationally.** If you will realistically train 4 days, say 4, not 6. Every answer changes the numbers, and "whatever you think" gets you the generic plan you were trying to avoid.
 
 If you do not know one, say so. Claude will ask it a different way rather than guess.
 
 ### Step 6 — you get the document
 
-Claude writes the plan, runs all four review layers, fixes what fails, and re-runs until it passes. Then it hands you the finished thing.
+Claude writes the plan, runs every check, fixes what fails, and re-runs until it passes. Then it hands you the finished thing.
 
 **Your answers are saved to a file starting with `private-`, which is set to never upload anywhere.**
 
 ---
 
-## What you actually get
+## 🤔 Why this exists
 
-**Pages 1 and 2 — what to do.**
+AI chats are good at writing plans that look right. They are not built to check them.
 
-- Every exercise, sets and reps, for each day
-- Every meal with real quantities: 2 roti, 1 katori dal, 250 ml milk
-- Supplements, doses, and what time of day
-- All 24 weeks and what changes in each
-- What to measure, how often, and what to do when the number moves
+| AI chats tell you | What they cannot know |
+|---|---|
+| "Eat 2,200 calories a day" | They did not ask your height, your job, or how much you walk, so the number is a starting guess rather than yours. |
+| "Here is your personalised plan" | Your name is on top. Underneath is the plan everyone gets. |
+| "Breakfast: 2 roti, 3 boiled eggs, salad" | The calories and protein are right. But people don't eat roti with just boiled eggs — there is nothing to eat it with. Nothing told the model that, so it could not know. |
+| "12 week programme" | There is no rest week in it. Recovery is not something a text model tracks across twelve weeks. |
+| "6 exercises for your calves" | Four need machines your gym may not have. It never asked what is in your gym. |
+| "This food helps burn belly fat" | No food does this. It repeated something common on the internet. |
 
-**Pages 3 and 4 — why.**
-
-- Where every number came from
-- How strong the evidence is behind each rule
-- 19 things you have heard about training and diet, and whether they are true
-- What a plan cannot fix, and what to see a doctor about
-
-Print the first two pages. The rest is for when you want to check something.
+None of this is carelessness. A chat has no way to test its own answer. **So you find out in month three.**
 
 ---
 
-## Running it without Claude
+## 🔍 How it gets checked
 
-Python 3.8 or newer. Nothing to install.
+Four review layers run over every plan before you see it. They look at different things and they disagree, which is the point.
 
-```bash
-python3 audit.py  --profile profiles/example-a.json --plan plans/example-a.json
-python3 render.py --profile profiles/example-a.json --plan plans/example-a.json \
-                  --out example-a-plan.md
+<details>
+<summary><b>🩺 What a doctor would stop</b></summary>
+
+| | |
+|---|---|
+| Refuses to plan at all | Under 18 · pregnant · under 12 weeks after giving birth · over 65 without a doctor's clearance |
+| Removes movements | 8 injury patterns mapped to 23 specific exercises, each with the reason it would aggravate |
+| Sends you to a clinician | For things a diet genuinely cannot fix, instead of planning around them |
+| Flags an injury it does not recognise | Rather than staying silent about it |
+
+</details>
+
+<details>
+<summary><b>🥗 What a dietitian would insist on</b></summary>
+
+| | |
+|---|---|
+| Protein | A floor that rises with age, and again when you are dieting |
+| Protein per meal | There is a point past which more in one sitting stops helping |
+| Fat, fibre, water | Minimums, not suggestions |
+| Weight loss speed | Capped, because faster costs you muscle |
+| Missing nutrients | 5 checks on what your food pattern does not supply, with a food fix before a supplement |
+| Food safety | Whether what you carry will still be safe by the time you eat it, based on your weather and storage |
+
+</details>
+
+<details>
+<summary><b>🏃 What a coach would notice</b></summary>
+
+| | |
+|---|---|
+| Sets per muscle per week | A floor and a ceiling, both moving with your training experience |
+| Priority muscles | Get a higher floor, or they were never really a priority |
+| Session length | Sets multiplied by how long a set takes in *your* gym, against the time you have |
+| Exercise order | Two heavy lifts back to back means the second one is done tired |
+| Equipment | An exercise needing a machine you do not have is removed, not suggested |
+| Rest weeks | Required, spaced by your age and sleep |
+
+</details>
+
+<details>
+<summary><b>🙋 What you would say</b></summary>
+
+| | |
+|---|---|
+| Is this a meal | Roti with nothing to eat it with is not breakfast, whatever the numbers say |
+| Would you eat it | A day of boiled eggs and plain salad does not survive 24 weeks |
+| Is it the same every day | Boredom ends more plans than physiology does |
+| Do the foods go together | Correct macros from three unrelated cuisines is not dinner |
+
+</details>
+
+**Two rules over the top.** 12 phrases can never appear in a plan — "spot reduce", "boosts testosterone", "burns belly fat", "detox" and others. And 23 sections are required, so if the supplements or the warm-up go missing, the plan is rejected rather than delivered short.
+
+### What that looks like
+
+**⚠️ Problems found — they get fixed and re-checked, and you never see this**
+
+<img src="docs/audit-fail.png" width="820" alt="The checker reporting ten violations in severity order">
+
+**✅ Nothing wrong — the plan gets written**
+
+<img src="docs/audit-pass.png" width="820" alt="The checker passing a plan with no violations">
+
+**🛑 It should not be planning for you at all — it says so and stops**
+
+<img src="docs/audit-refuse.png" width="820" alt="The checker refusing to plan for a 16 year old">
+
+### The order it fixes things in
+
+There are 8 severity levels. A problem lower down can never be fixed by causing one higher up.
+
+```
+1  Refuse             you are pregnant, or your gym has no leg press
+2  Food safety        the chicken will spoil before lunch
+3  Minimums           not enough protein, not enough sets, losing weight too fast
+4  Time and maths     the session does not fit in an hour
+5  Is it a meal       roti with nothing to eat it with
+6  Spreading protein  all of it in one sitting
+7  Boredom            the same food every single day
+8  Do you like it     you will not eat this for 24 weeks
 ```
 
-Copy `profiles/example-a.json`, change the values to yours, save it as `profiles/private-you.json`.
+It will not fix "this is boring" by telling you to carry food that spoils.
 
 ---
 
-## Questions
+## 🐛 What it has caught
+
+Real numbers from real plans, and what each one would have done to you.
+
+| The mistake | Why it happened | What it would have cost you |
+|---|---|---|
+| 1 teaspoon of oil counted in your sabji | A real kitchen uses about 3 | 210 extra calories a day, invisible. Six months of that is losing 5 kg instead of 9. |
+| "Glutes are a priority muscle" | Given 10 sets a week; the minimum is 12 | Six months of training glutes and wondering why nothing changed. |
+| "60 minute sessions" | Four of five actually needed 71 to 78 minutes | Late for work every day, or quietly skipping the last two exercises. |
+| "Diet break in week 12" | Training had its easy weeks at 11 and 18 | Eating more during your hardest week, dieting through your easiest. |
+| One calorie formula for everyone | It was the male version | Every woman told to eat 166 calories a day more than she needs. |
+| "2 roti, 3 boiled eggs, salad" | Calories and protein both correct | You would have stopped in a week, and blamed yourself. |
+| A ranking bug | "This food will spoil" scored as less serious than "this food is boring" | Being told to carry cooked chicken that sits at 30°C for eight hours. |
+
+Every one is now a test. None of them can come back.
+
+---
+
+## ❓ Questions
 
 **Is this another AI fitness app?**
 No. There is no AI model inside it. It is arithmetic and a list of rules you can read yourself in an afternoon. Claude is only the part that talks to you.
@@ -298,7 +289,7 @@ Then it plans around dumbbells. Exercises needing machines you do not have are r
 
 ---
 
-## What it will never tell you
+## 🙅 What it will never tell you
 
 - That any food, supplement, or eating at a certain time removes fat from one part of your body. Nothing does this.
 - That a food grows one specific muscle. Food does not work on one muscle.
@@ -307,11 +298,25 @@ Then it plans around dumbbells. Exercises needing machines you do not have are r
 Where evidence is weak, it says so, and gives it to you as something to test for a set number of weeks with a way to tell whether it worked.
 
 ---
+
+## 💻 Running it without Claude
+
+Python 3.8 or newer. Nothing to install.
+
+```bash
+python3 audit.py  --profile profiles/example-a.json --plan plans/example-a.json
+python3 render.py --profile profiles/example-a.json --plan plans/example-a.json \
+                  --out example-a-plan.md
+```
+
+Copy `profiles/example-a.json`, change the values to yours, save it as `profiles/private-you.json`.
+
+---
 ---
 
-# For developers
+# 🛠️ For developers
 
-## Why training and diet are one programme
+## 🔗 Why training and diet are one programme
 
 They change each other:
 
@@ -322,7 +327,7 @@ eat less → recover slower → need rest weeks sooner
 
 Built separately they contradict. An earlier version put the diet break in week 12 and training rest weeks at 11 and 18. Neither half could see the problem, because neither half could see the other.
 
-## Files
+## 📁 Files
 
 | File | What is in it |
 |---|---|
@@ -337,27 +342,27 @@ Built separately they contradict. An earlier version put the diet break in week 
 | `SKILL.md` | What Claude follows to run all of it |
 | `data/` | Food and exercise lists. Swap these, not the code |
 
-## Two kinds of check
+## ✅ Two kinds of check
 
 Early versions only asked *is this number allowed*. None asked *is this section even here*. Wrong numbers were caught; missing sections were not. Supplements disappeared between two drafts. The warm-up was never written down.
 
 `contract.py` fixes it: 23 required sections, each with a test that removes it and confirms the plan gets rejected.
 
-## Review loops that cannot get stuck
+## 🔄 Review loops that cannot get stuck
 
 `resolve.py` settles one severity level, locks it, moves down. A later level cannot reopen an earlier one. Every round must measurably improve the plan, so two fixes that undo each other are rejected rather than repeating. Total work is capped regardless of how the reviewers behave.
 
 The loop takes reviewers as arguments — it does not ship named ones. The four layers above are implemented as rule functions in `physio.py` and `coherence.py`, not as separate agents.
 
-## Tests
+## 🧪 Tests
 
 ```bash
-python3 -m unittest discover -p 'test_*.py'   # 67 tests
+python3 -m unittest discover -p 'test_*.py'   # 71 tests
 ```
 
 Most exist because something was already broken when it shipped.
 
-## What it does not handle
+## ⚠️ What it does not handle
 
 - Body fat is estimated from a measuring tape, so it is rough.
 - Alcohol, eating out, and social meals are not in it.

@@ -53,8 +53,20 @@ def meal_problems(items, foods):
 def session_problems(exercises, lib, equipment, minutes):
     """exercises: [{name, sets, reps}] in the order they will be performed.
     lib: name -> {pattern, equipment, load_class, category}
-    equipment: what this gym actually has."""
+    equipment: what this gym actually has.
+
+    An exercise the library does not know used to raise KeyError and take the
+    whole audit down. Silence and a traceback are the same failure: the person
+    learns nothing about the exercise. It is now a refusal with a name in it.
+    """
     out = []
+    unknown = [e["name"] for e in exercises if e["name"] not in lib]
+    for n in unknown:
+        out.append(("refusal", f"'{n}' is not in the exercise library, so nothing "
+                    f"could be checked about it -- not the equipment it needs, "
+                    f"not whether an injury rules it out. Add it to the library "
+                    f"or replace it."))
+    exercises = [e for e in exercises if e["name"] in lib]
     names = [e["name"] for e in exercises]
 
     # 1. Equipment the gym does not have. The training version of assuming an

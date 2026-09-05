@@ -157,3 +157,33 @@ class Categories(unittest.TestCase):
             {"mon": {"dinner": [("dal", 1), ("roti", 2)]},
              "tue": {"dinner": [("curd", 1), ("rice", 1)]}}, self.FOODS_CAT)
         self.assertEqual(prob, [])
+
+
+class UnknownExercise(unittest.TestCase):
+    """An exercise the library does not know must be reported, not crash.
+
+    It used to raise KeyError and take the whole audit down, which tells the
+    person nothing about the exercise and hides every other problem behind it.
+    """
+
+    LIB = {"leg press": dict(pattern="knee_extension", equipment="leg press",
+                             load_class="heavy", uses=[], tolerability=4)}
+
+    def test_an_unknown_exercise_is_a_refusal_not_an_exception(self):
+        out = C.session_problems([{"name": "zercher good morning", "sets": 3}],
+                                 self.LIB, ["leg press"], 60)
+        self.assertEqual([k for k, _ in out], ["refusal"])
+        self.assertIn("zercher good morning", out[0][1])
+
+    def test_the_rest_of_the_session_is_still_checked(self):
+        out = C.session_problems(
+            [{"name": "zercher good morning", "sets": 3},
+             {"name": "leg press", "sets": 4}],
+            self.LIB, [], 60)
+        kinds = [k for k, _ in out]
+        self.assertEqual(kinds.count("refusal"), 2)   # unknown, and no leg press
+
+    def test_a_known_session_is_unaffected(self):
+        out = C.session_problems([{"name": "leg press", "sets": 4}],
+                                 self.LIB, ["leg press"], 60)
+        self.assertEqual(out, [])
