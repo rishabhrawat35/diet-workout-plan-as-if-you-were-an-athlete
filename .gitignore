@@ -4,3 +4,4 @@ profiles/private-*.json
 plans/private-*.json
 *.pdf
 *-plan.md
+.DS_Store
