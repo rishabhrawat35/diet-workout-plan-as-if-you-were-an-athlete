@@ -1,0 +1,312 @@
+{
+ "_note": "Region and preference live here, never in the code. kcal/protein/fat/carb/fibre per the stated household unit.",
+ "black coffee": {
+  "u": [
+   2,
+   0.3,
+   0,
+   0,
+   0
+  ],
+  "role": "drink",
+  "cuisine": [],
+  "palatability": 4,
+  "tags": []
+ },
+ "banana 1 medium": {
+  "u": [
+   105,
+   1.3,
+   0.3,
+   27,
+   3
+  ],
+  "role": "fruit",
+  "cuisine": [],
+  "palatability": 4,
+  "tags": [
+   "fruit"
+  ]
+ },
+ "orange 1 medium": {
+  "u": [
+   62,
+   1.2,
+   0.2,
+   15,
+   3.1
+  ],
+  "role": "fruit",
+  "cuisine": [],
+  "palatability": 5,
+  "tags": [
+   "fruit",
+   "vitamin_c"
+  ]
+ },
+ "roti 1 medium": {
+  "u": [
+   100,
+   3.2,
+   0.6,
+   20,
+   2.5
+  ],
+  "role": "carrier",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 3,
+  "tags": [
+   "grain"
+  ]
+ },
+ "rice cooked 1 katori": {
+  "u": [
+   195,
+   4,
+   0.4,
+   43,
+   0.6
+  ],
+  "role": "carrier",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 3,
+  "tags": [
+   "grain",
+   "perishable",
+   "cooked_rice"
+  ]
+ },
+ "dal cooked 1 katori": {
+  "u": [
+   120,
+   7,
+   2,
+   18,
+   5
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 4,
+  "tags": [
+   "legume",
+   "perishable"
+  ],
+  "category": [
+   "toor",
+   "moong",
+   "masoor",
+   "urad"
+  ]
+ },
+ "sabji 1 katori": {
+  "u": [
+   150,
+   3,
+   12,
+   10,
+   4
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 4,
+  "tags": [
+   "leafy_greens",
+   "perishable"
+  ],
+  "category": [
+   "bhindi",
+   "lauki",
+   "baingan",
+   "palak",
+   "gobi"
+  ]
+ },
+ "egg bhurji, 3 whole eggs": {
+  "u": [
+   286,
+   18.9,
+   20,
+   6,
+   1
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 5,
+  "tags": [
+   "egg",
+   "perishable"
+  ]
+ },
+ "egg curry, 2 whole eggs": {
+  "u": [
+   229,
+   12.6,
+   15,
+   9,
+   2
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 5,
+  "tags": [
+   "egg",
+   "perishable"
+  ]
+ },
+ "egg white 1": {
+  "u": [
+   17,
+   3.6,
+   0,
+   0.2,
+   0
+  ],
+  "role": "anchor",
+  "cuisine": [],
+  "palatability": 2,
+  "tags": [
+   "egg",
+   "perishable"
+  ]
+ },
+ "paneer 100 g": {
+  "u": [
+   265,
+   18,
+   20,
+   3,
+   0
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 5,
+  "tags": [
+   "dairy",
+   "perishable"
+  ]
+ },
+ "curd 1 katori": {
+  "u": [
+   90,
+   4.7,
+   6,
+   4.5,
+   0
+  ],
+  "role": "wet",
+  "cuisine": [
+   "indian"
+  ],
+  "palatability": 4,
+  "tags": [
+   "dairy",
+   "perishable"
+  ]
+ },
+ "salad raw 1 bowl": {
+  "u": [
+   40,
+   2,
+   0.5,
+   8,
+   3
+  ],
+  "role": "side",
+  "cuisine": [],
+  "palatability": 2,
+  "tags": [
+   "leafy_greens",
+   "vitamin_c"
+  ]
+ },
+ "roasted chana 30 g": {
+  "u": [
+   110,
+   6,
+   2,
+   17,
+   5
+  ],
+  "role": "side",
+  "cuisine": [],
+  "palatability": 4,
+  "tags": [
+   "legume"
+  ]
+ },
+ "dry fruits 20 g": {
+  "u": [
+   140,
+   3.5,
+   10,
+   11,
+   2.5
+  ],
+  "role": "side",
+  "cuisine": [],
+  "palatability": 5,
+  "tags": [
+   "nut"
+  ]
+ },
+ "high-protein milk 250 ml": {
+  "u": [
+   152,
+   25,
+   0,
+   13,
+   0
+  ],
+  "role": "drink",
+  "cuisine": [],
+  "palatability": 4,
+  "tags": [
+   "dairy",
+   "perishable"
+  ]
+ },
+ "whey 1 scoop in water": {
+  "u": [
+   120,
+   24,
+   1.5,
+   2,
+   0
+  ],
+  "role": "drink",
+  "cuisine": [],
+  "palatability": 3,
+  "tags": [
+   "dairy"
+  ]
+ },
+ "boiled egg 1": {
+  "u": [
+   72,
+   6.3,
+   5,
+   0.4,
+   0
+  ],
+  "role": "anchor",
+  "cuisine": [],
+  "palatability": 3,
+  "tags": [
+   "egg"
+  ]
+ }
+}

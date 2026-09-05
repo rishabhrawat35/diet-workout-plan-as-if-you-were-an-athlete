@@ -1,0 +1,46 @@
+{
+ "name": "Example B \u2014 52, three days a week, shoulder",
+ "sex": "f",
+ "age": 52,
+ "kg": 68.0,
+ "cm": 163.0,
+ "waist_cm": 84.0,
+ "sleep_h": 6.0,
+ "training_age_yrs": 0.5,
+ "detrained": false,
+ "deficit": true,
+ "enhanced": false,
+ "medically_cleared": true,
+ "chest_tissue_unassessed": false,
+ "job": "desk",
+ "steps": 9000,
+ "days": 3,
+ "minutes": 45,
+ "gym_traffic": "busy",
+ "equipment": [
+  "adjustable bench",
+  "chest press machine",
+  "leg press",
+  "leg extension machine",
+  "leg curl machine",
+  "calf machine",
+  "cable stack",
+  "dumbbells",
+  ""
+ ],
+ "injuries": [
+  "shoulder impingement"
+ ],
+ "priorities": [
+  "glutes"
+ ],
+ "ambient_c": 30,
+ "storage": "none",
+ "hold_hours": 3,
+ "protein_sources": [
+  "dairy",
+  "legume"
+ ],
+ "cooking_fat": "light",
+ "eating_occasions": 4
+}

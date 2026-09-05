@@ -1,0 +1,49 @@
+{
+ "name": "Example A \u2014 30, returning after a back injury",
+ "sex": "m",
+ "age": 30,
+ "kg": 80.0,
+ "cm": 178.0,
+ "waist_cm": 95.0,
+ "sleep_h": 7.0,
+ "training_age_yrs": 5,
+ "detrained": true,
+ "deficit": true,
+ "enhanced": false,
+ "medically_cleared": true,
+ "chest_tissue_unassessed": true,
+ "job": "desk",
+ "steps": 9000,
+ "days": 5,
+ "minutes": 60,
+ "gym_traffic": "shared",
+ "equipment": [
+  "adjustable bench",
+  "chest press machine",
+  "leg press",
+  "leg extension machine",
+  "leg curl machine",
+  "calf machine",
+  "cable stack",
+  "dumbbells",
+  ""
+ ],
+ "injuries": [
+  "lumbar disc, currently pain-free"
+ ],
+ "priorities": [
+  "calves",
+  "chest",
+  "glutes"
+ ],
+ "ambient_c": 23,
+ "storage": "insulated_gelpack",
+ "hold_hours": 6,
+ "protein_sources": [
+  "egg",
+  "dairy",
+  "legume"
+ ],
+ "cooking_fat": "typical_home",
+ "eating_occasions": 6
+}

@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+profiles/private-*.json
+plans/private-*.json
+*.pdf
+*-plan.md

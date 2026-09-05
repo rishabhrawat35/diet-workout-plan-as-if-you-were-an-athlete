@@ -1,0 +1,379 @@
+{
+ "week": {
+  "D1 Upper, chest": [
+   {
+    "name": "incline dumbbell press 30 deg",
+    "muscle": "chest",
+    "sets": 4,
+    "reps": "6-8",
+    "also": [
+     "delts",
+     "triceps"
+    ]
+   },
+   {
+    "name": "cable fly low to high",
+    "muscle": "chest",
+    "sets": 3,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "chest supported row",
+    "muscle": "back",
+    "sets": 4,
+    "reps": "8-10",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "lateral raise",
+    "muscle": "delts",
+    "sets": 3,
+    "reps": "12-15",
+    "also": [],
+    "pair": "standing calf raise"
+   },
+   {
+    "name": "standing calf raise",
+    "muscle": "calves",
+    "sets": 4,
+    "reps": "8-12",
+    "also": [],
+    "pair": "lateral raise"
+   }
+  ],
+  "D2 Lower, quads and glutes": [
+   {
+    "name": "leg press",
+    "muscle": "quads",
+    "sets": 4,
+    "reps": "8-12",
+    "also": [
+     "glutes"
+    ]
+   },
+   {
+    "name": "leg extension",
+    "muscle": "quads",
+    "sets": 3,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "hip thrust",
+    "muscle": "glutes",
+    "sets": 4,
+    "reps": "10-12",
+    "also": []
+   },
+   {
+    "name": "seated calf raise",
+    "muscle": "calves",
+    "sets": 4,
+    "reps": "12-15",
+    "also": [],
+    "pair": "dead bug"
+   },
+   {
+    "name": "dead bug",
+    "muscle": "core",
+    "sets": 3,
+    "reps": "8 each side",
+    "also": [],
+    "pair": "seated calf raise"
+   },
+   {
+    "name": "90/90 hip switch",
+    "muscle": "core",
+    "sets": 2,
+    "reps": "10 each side",
+    "also": [],
+    "pair": "seated calf raise"
+   }
+  ],
+  "D3 Upper, back": [
+   {
+    "name": "lat pulldown",
+    "muscle": "back",
+    "sets": 4,
+    "reps": "8-10",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "face pull",
+    "muscle": "delts",
+    "sets": 3,
+    "reps": "15-20",
+    "also": []
+   },
+   {
+    "name": "chest supported row",
+    "muscle": "back",
+    "sets": 4,
+    "reps": "10-12",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "cable curl",
+    "muscle": "biceps",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [],
+    "pair": "leg press calf press"
+   },
+   {
+    "name": "leg press calf press",
+    "muscle": "calves",
+    "sets": 4,
+    "reps": "10-12",
+    "also": [],
+    "pair": "cable curl"
+   }
+  ],
+  "D4 Lower, glutes and hamstrings": [
+   {
+    "name": "romanian deadlift, dumbbells",
+    "muscle": "hamstrings",
+    "sets": 4,
+    "reps": "8-10",
+    "also": [
+     "glutes"
+    ]
+   },
+   {
+    "name": "seated leg curl",
+    "muscle": "hamstrings",
+    "sets": 3,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "hip thrust",
+    "muscle": "glutes",
+    "sets": 4,
+    "reps": "8-10",
+    "also": []
+   },
+   {
+    "name": "standing calf raise",
+    "muscle": "calves",
+    "sets": 4,
+    "reps": "8-12",
+    "also": [],
+    "pair": "dead bug"
+   },
+   {
+    "name": "dead bug",
+    "muscle": "core",
+    "sets": 3,
+    "reps": "8 each side",
+    "also": [],
+    "pair": "standing calf raise"
+   }
+  ],
+  "D5 Upper, chest again": [
+   {
+    "name": "incline dumbbell press 30 deg",
+    "muscle": "chest",
+    "sets": 4,
+    "reps": "8-10",
+    "also": [
+     "delts",
+     "triceps"
+    ]
+   },
+   {
+    "name": "seated calf raise",
+    "muscle": "calves",
+    "sets": 4,
+    "reps": "12-15",
+    "also": [],
+    "pair": "lateral raise"
+   },
+   {
+    "name": "cable row",
+    "muscle": "back",
+    "sets": 4,
+    "reps": "10-12",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "lateral raise",
+    "muscle": "delts",
+    "sets": 3,
+    "reps": "15-20",
+    "also": [],
+    "pair": "seated calf raise"
+   },
+   {
+    "name": "incline machine press",
+    "muscle": "chest",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "triceps"
+    ]
+   }
+  ]
+ },
+ "day": {
+  "06:45 pre-training": [
+   [
+    "black coffee",
+    1
+   ],
+   [
+    "banana 1 medium",
+    1
+   ]
+  ],
+  "08:00 after training": [
+   [
+    "whey 1 scoop in water",
+    1
+   ]
+  ],
+  "09:00 breakfast, home": [
+   [
+    "egg bhurji, 3 whole eggs",
+    1
+   ],
+   [
+    "roti 1 medium",
+    2
+   ],
+   [
+    "egg white 1",
+    3
+   ]
+  ],
+  "13:00 lunch, carried": [
+   [
+    "egg curry, 2 whole eggs",
+    1
+   ],
+   [
+    "egg white 1",
+    4
+   ],
+   [
+    "rice cooked 1 katori",
+    0.5
+   ],
+   [
+    "dal cooked 1 katori",
+    1
+   ],
+   [
+    "orange 1 medium",
+    1
+   ]
+  ],
+  "17:00 office": [
+   [
+    "high-protein milk 250 ml",
+    1
+   ],
+   [
+    "dry fruits 20 g",
+    1
+   ],
+   [
+    "roasted chana 30 g",
+    1
+   ]
+  ],
+  "20:30 dinner, home": [
+   [
+    "paneer 100 g",
+    0.5
+   ],
+   [
+    "curd 1 katori",
+    1
+   ],
+   [
+    "sabji 1 katori",
+    1
+   ],
+   [
+    "salad raw 1 bowl",
+    1
+   ],
+   [
+    "high-protein milk 250 ml",
+    1
+   ]
+  ]
+ },
+ "rest_day_changes": [
+  "Drop the 06:45 banana and the 08:00 whey.",
+  "Add 1 katori curd to the 13:00 lunch."
+ ],
+ "supplements": [
+  {
+   "item": "Creatine monohydrate",
+   "dose": "5 g",
+   "when": "With breakfast, every day including rest days"
+  },
+  {
+   "item": "Whey protein",
+   "dose": "1 scoop",
+   "when": "Straight after training"
+  },
+  {
+   "item": "Fish oil",
+   "dose": "1 to 2 g combined EPA and DHA",
+   "when": "With dinner"
+  },
+  {
+   "item": "Vitamin D",
+   "dose": "Dose to your blood test result",
+   "when": "With dinner"
+  }
+ ],
+ "floor_day": [
+  [
+   "high-protein milk 250 ml",
+   2
+  ],
+  [
+   "whey 1 scoop in water",
+   2
+  ],
+  [
+   "boiled egg 1",
+   6
+  ],
+  [
+   "roasted chana 30 g",
+   1
+  ],
+  [
+   "roti 1 medium",
+   3
+  ],
+  [
+   "dal cooked 1 katori",
+   1
+  ]
+ ],
+ "warmup": "Warm up: 5 minutes on a bike or brisk walking, then 2 sets of the first exercise at half the working weight for 8 reps, then 1 set at 75 percent of the working weight for 3 reps.",
+ "progression": "Add weight when you hit the top of the rep range on every set of an exercise for two sessions in a row. Add the smallest increment the equipment allows.",
+ "proximity": "Take every set to 1 or 2 reps short of the point where form breaks. Do not train to failure on the first exercise of any day.",
+ "deload_rule": "In a deload week do every exercise listed, at half the sets, at the same weight.",
+ "bad_day": [
+  "Short on time: do the first three exercises at full sets and stop.",
+  "Equipment occupied: do the next exercise on the list and come back.",
+  "Missed a day: do it the next day. Do not merge two sessions into one.",
+  "Missed a week: restart at the last deload week, not where you left off."
+ ]
+}
