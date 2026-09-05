@@ -158,14 +158,29 @@ class NoPersona(unittest.TestCase):
             "myths.py", "resolve.py", "audit.py", "render.py",
             "SKILL.md", "README.md")
 
-    def test_no_personal_identifier_appears_in_any_module(self):
-        banned = ("rira", "rishabh", "onsurity", "bangalore", "provilac",
-                  "l4-l5", "l5-s1")
+    # Banned everywhere, no exceptions: health details, employer, home city,
+    # local brands, the individual's name. None of these belong in a general
+    # engine or in its documentation.
+    PRIVATE = ("rira", "onsurity", "bangalore", "provilac", "l4-l5", "l5-s1")
+
+    # A public repository URL is not personal data, and install instructions
+    # cannot be written without it. Banned in code, allowed in the README only.
+    PUBLIC_HANDLE = ("rishabh",)
+
+    def test_no_private_identifier_appears_anywhere(self):
         for f in self.CODE:
             with open(os.path.join(HERE, f)) as fh:
                 text = fh.read().lower()
-            for b in banned:
+            for b in self.PRIVATE:
                 self.assertNotIn(b, text, f"{b} found in {f}")
+
+    def test_the_repo_handle_stays_out_of_the_code(self):
+        for f in [c for c in self.CODE if c != "README.md"]:
+            with open(os.path.join(HERE, f)) as fh:
+                text = fh.read().lower()
+            for b in self.PUBLIC_HANDLE:
+                self.assertNotIn(b, text, f"{b} found in {f}; only README may "
+                                          f"carry the repository URL")
 
     def test_no_module_hardcodes_a_bodyweight_or_measurement(self):
         for f in self.CODE:
