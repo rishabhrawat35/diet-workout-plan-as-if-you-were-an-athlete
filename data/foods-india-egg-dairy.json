@@ -1,7 +1,8 @@
 {
- "_note": "Region and preference live here, never in the code. kcal/protein/fat/carb/fibre per the stated household unit.",
+ "_note": "Region and preference live here, never in the code. `per` is the macro vector for ONE `unit`: [kcal, protein_g, fat_g, carb_g, fibre_g]. A quantity is never part of a name -- that is what produced '3 x egg white 1' in an earlier version. `made_of` lists what goes into a composite dish so the reader can rebuild or swap it. `unit_plural` overrides the unit's plural; `name_plural` is only set where the food name itself pluralises, because most do not (sabji, dal, curd, paneer).",
  "black coffee": {
-  "u": [
+  "unit": "cup",
+  "per": [
    2,
    0.3,
    0,
@@ -13,8 +14,9 @@
   "palatability": 4,
   "tags": []
  },
- "banana 1 medium": {
-  "u": [
+ "banana": {
+  "unit": "medium",
+  "per": [
    105,
    1.3,
    0.3,
@@ -26,10 +28,12 @@
   "palatability": 4,
   "tags": [
    "fruit"
-  ]
+  ],
+  "name_plural": "bananas"
  },
- "orange 1 medium": {
-  "u": [
+ "orange": {
+  "unit": "medium",
+  "per": [
    62,
    1.2,
    0.2,
@@ -42,10 +46,12 @@
   "tags": [
    "fruit",
    "vitamin_c"
-  ]
+  ],
+  "name_plural": "oranges"
  },
- "roti 1 medium": {
-  "u": [
+ "roti": {
+  "unit": "roti",
+  "per": [
    100,
    3.2,
    0.6,
@@ -59,10 +65,13 @@
   "palatability": 3,
   "tags": [
    "grain"
-  ]
+  ],
+  "made_of": "35 g whole wheat atta, no oil on the pan",
+  "unit_plural": "roti"
  },
- "rice cooked 1 katori": {
-  "u": [
+ "rice": {
+  "unit": "katori",
+  "per": [
    195,
    4,
    0.4,
@@ -78,10 +87,12 @@
    "grain",
    "perishable",
    "cooked_rice"
-  ]
+  ],
+  "made_of": "about 50 g raw rice, cooked"
  },
- "dal cooked 1 katori": {
-  "u": [
+ "dal": {
+  "unit": "katori",
+  "per": [
    120,
    7,
    2,
@@ -102,10 +113,12 @@
    "moong",
    "masoor",
    "urad"
-  ]
+  ],
+  "made_of": "about 30 g raw dal, 1 tsp oil in the tempering"
  },
- "sabji 1 katori": {
-  "u": [
+ "sabji": {
+  "unit": "katori",
+  "per": [
    150,
    3,
    12,
@@ -127,10 +140,12 @@
    "baingan",
    "palak",
    "gobi"
-  ]
+  ],
+  "made_of": "about 150 g vegetables, 12 g oil as a home kitchen actually uses"
  },
- "egg bhurji, 3 whole eggs": {
-  "u": [
+ "egg bhurji": {
+  "unit": "serving",
+  "per": [
    286,
    18.9,
    20,
@@ -145,10 +160,12 @@
   "tags": [
    "egg",
    "perishable"
-  ]
+  ],
+  "made_of": "3 whole eggs, 1 tsp oil, onion and tomato"
  },
- "egg curry, 2 whole eggs": {
-  "u": [
+ "egg curry": {
+  "unit": "serving",
+  "per": [
    229,
    12.6,
    15,
@@ -163,10 +180,13 @@
   "tags": [
    "egg",
    "perishable"
-  ]
+  ],
+  "made_of": "2 whole boiled eggs, 1 tsp oil, onion and tomato gravy"
  },
- "egg white 1": {
-  "u": [
+ "egg white": {
+  "unit": "egg white",
+  "unit_plural": "egg whites",
+  "per": [
    17,
    3.6,
    0,
@@ -179,14 +199,34 @@
   "tags": [
    "egg",
    "perishable"
-  ]
+  ],
+  "made_of": "boiled or scrambled, yolk discarded"
  },
- "paneer 100 g": {
-  "u": [
-   265,
-   18,
-   20,
-   3,
+ "boiled egg": {
+  "unit": "boiled egg",
+  "unit_plural": "boiled eggs",
+  "per": [
+   72,
+   6.3,
+   5,
+   0.4,
+   0
+  ],
+  "role": "anchor",
+  "cuisine": [],
+  "palatability": 3,
+  "tags": [
+   "egg"
+  ],
+  "made_of": "whole egg, boiled in the shell"
+ },
+ "paneer": {
+  "unit": "g",
+  "per": [
+   2.65,
+   0.18,
+   0.2,
+   0.03,
    0
   ],
   "role": "wet",
@@ -197,10 +237,12 @@
   "tags": [
    "dairy",
    "perishable"
-  ]
+  ],
+  "made_of": "full fat paneer, pan tossed with 1 tsp oil"
  },
- "curd 1 katori": {
-  "u": [
+ "curd": {
+  "unit": "katori",
+  "per": [
    90,
    4.7,
    6,
@@ -215,10 +257,12 @@
   "tags": [
    "dairy",
    "perishable"
-  ]
+  ],
+  "made_of": "about 150 g set curd, full fat"
  },
- "salad raw 1 bowl": {
-  "u": [
+ "salad": {
+  "unit": "bowl",
+  "per": [
    40,
    2,
    0.5,
@@ -231,44 +275,50 @@
   "tags": [
    "leafy_greens",
    "vitamin_c"
-  ]
+  ],
+  "made_of": "cucumber, tomato, onion, lemon, no oil"
  },
- "roasted chana 30 g": {
-  "u": [
-   110,
-   6,
-   2,
-   17,
-   5
+ "roasted chana": {
+  "unit": "g",
+  "per": [
+   3.67,
+   0.2,
+   0.067,
+   0.567,
+   0.167
   ],
   "role": "side",
   "cuisine": [],
   "palatability": 4,
   "tags": [
    "legume"
-  ]
+  ],
+  "made_of": "dry roasted, unsalted"
  },
- "dry fruits 20 g": {
-  "u": [
-   140,
-   3.5,
-   10,
-   11,
-   2.5
+ "dry fruits": {
+  "unit": "g",
+  "per": [
+   7.0,
+   0.175,
+   0.5,
+   0.55,
+   0.125
   ],
   "role": "side",
   "cuisine": [],
   "palatability": 5,
   "tags": [
    "nut"
-  ]
+  ],
+  "made_of": "almonds, walnuts and dates, roughly equal by weight"
  },
- "high-protein milk 250 ml": {
-  "u": [
-   152,
-   25,
+ "high-protein milk": {
+  "unit": "ml",
+  "per": [
+   0.608,
+   0.1,
    0,
-   13,
+   0.052,
    0
   ],
   "role": "drink",
@@ -277,10 +327,12 @@
   "tags": [
    "dairy",
    "perishable"
-  ]
+  ],
+  "made_of": "skimmed, protein concentrated, lactose free"
  },
- "whey 1 scoop in water": {
-  "u": [
+ "whey in water": {
+  "unit": "scoop",
+  "per": [
    120,
    24,
    1.5,
@@ -292,21 +344,7 @@
   "palatability": 3,
   "tags": [
    "dairy"
-  ]
- },
- "boiled egg 1": {
-  "u": [
-   72,
-   6.3,
-   5,
-   0.4,
-   0
   ],
-  "role": "anchor",
-  "cuisine": [],
-  "palatability": 3,
-  "tags": [
-   "egg"
-  ]
+  "made_of": "30 g whey isolate in 300 ml water"
  }
 }

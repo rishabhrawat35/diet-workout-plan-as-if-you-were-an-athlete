@@ -15,8 +15,53 @@ Reasoning, evidence and standing answers go to the appendix, so the body stays
 something you can print and work from.
 """
 import json, sys
-import physio, blocks, myths, contract
+import physio, blocks, myths, contract, units, ledger
 from audit import load, run, food_totals
+
+
+def rest_day_diff(plan, foods):
+    """What changes between the training day and the rest day, in sentences.
+
+    This was a hand-written list in the plan file. Nothing kept it honest, so
+    editing one day silently left the other day's description wrong.
+
+    A food that leaves one slot and appears in another at the same quantity is
+    one move, not a deletion and an unrelated addition.
+    """
+    def bare(name, q, food):
+        """'the banana', not 'the 1 medium banana'."""
+        s = units.amount(name, q, food)
+        return s[2:] if s.startswith("1 ") else s
+
+    train, rest = plan["day"], plan["day_rest"]
+    dropped, added, out = {}, {}, []
+
+    for slot in train:
+        a = {n: q for n, q in train[slot]}
+        b = {n: q for n, q in rest.get(slot, [])}
+        for n, q in a.items():
+            if n not in b:
+                dropped[(n, q)] = slot
+            elif b[n] != q:
+                out.append(f"{slot}: {bare(n, q, foods[n])} becomes "
+                           f"{bare(n, b[n], foods[n])}.")
+    for slot in rest:
+        a = {n: q for n, q in train.get(slot, [])}
+        for n, q in rest[slot]:
+            if n not in a:
+                added[(n, q)] = slot
+
+    for key in list(dropped):
+        if key in added:
+            n, q = key
+            out.append(f"Move {units.amount(n, q, foods[n])} from "
+                       f"{dropped[key].split(' ', 1)[0]} to {added[key].split(' ', 1)[0]}.")
+            del dropped[key], added[key]
+    for (n, q), slot in dropped.items():
+        out.append(f"{slot}: drop the {bare(n, q, foods[n])}.")
+    for (n, q), slot in added.items():
+        out.append(f"{slot}: add {units.amount(n, q, foods[n])}.")
+    return out or ["Nothing changes."]
 
 
 def render(p, plan, foods, lib):
@@ -57,21 +102,36 @@ def render(p, plan, foods, lib):
       for m, n in sorted(tot.items(), key=lambda x: -x[1])))
     w("")
 
+    def printed(day):
+        """Sum the rounded rows, not round the summed rows. The header and the
+        itemised table must show the same numbers or the reader is right and
+        the document is wrong."""
+        k = pr = fa = cb = fb = 0
+        for items in day.values():
+            for n, q in items:
+                m = units.macros(q, foods[n])
+                k += round(m[0]); pr = round(pr + round(m[1], 1), 1)
+                fa = round(fa + round(m[2], 1), 1); cb += round(m[3])
+                fb = round(fb + round(m[4], 1), 1)
+        return k, pr, fa, cb, fb
+
+    tk, tp, tf, tc, tfb = printed(plan["day"])
     w("## Every day you train")
     w("")
-    w(f"{s['kcal']:.0f} calories | {s['prot']:.0f} g protein | {s['fat']:.0f} g fat | "
-      f"{s['carb']:.0f} g carbohydrate | {s['fib']:.0f} g fibre | "
-      f"{physio.fluid_ml(p)} ml water")
+    w(f"{tk} calories | {tp:g} g protein | {tf:g} g fat | {tc} g carbohydrate | "
+      f"{tfb:g} g fibre | {physio.fluid_ml(p)} ml water")
     w("")
     w("| Time | Food |")
     w("|---|---|")
     for slot, items in plan["day"].items():
-        line = ", ".join(f"{q:g} x {n}" if q != 1 else n for n, q in items)
-        w(f"| {slot} | {line} |")
+        w(f"| {slot} | " + ", ".join(units.amount(n, q, foods[n]) for n, q in items) + " |")
     w("")
+
+    # The rest day used to be a hand-written sentence that could contradict the
+    # data. It is now derived from the two days, so it cannot go stale.
     w("On days you do not train:")
-    for c in plan["rest_day_changes"]:
-        w(f"- {c}")
+    for line in rest_day_diff(plan, foods):
+        w(f"- {line}")
     w("")
     w(f"Last caffeine of the day: {physio.caffeine_cutoff_h_before_bed(p)} hours "
       f"before you go to bed.")
@@ -82,6 +142,7 @@ def render(p, plan, foods, lib):
             f"{n} ({', '.join(c)})" for n, c in cats) + ".")
         w("")
 
+    pf, pt = physio.protein_target_g(p)
     w("## Supplements")
     w("")
     w("| Item | Dose | When |")
@@ -107,7 +168,7 @@ def render(p, plan, foods, lib):
     w("| What | How often | Do this when |")
     w("|---|---|---|")
     w(f"| Waist at the navel, before food | Weekly | Stop the deficit at "
-      f"{physio.deficit_stop_waist_cm(p)} cm |")
+      f"{physio.deficit_stop_waist_cm(p):g} cm |")
     w("| Bodyweight, morning, 7 day average | Daily, read weekly | Under 0.2 kg "
       "a week for 3 weeks: remove 150 calories. Over 0.7 kg a week: add 150 |")
     w("| Top set weight on incline press and leg press | Weekly | Falling for 2 "
@@ -124,7 +185,7 @@ def render(p, plan, foods, lib):
     fl = plan["floor_day"]
     ft = food_totals([tuple(i) for i in fl], foods)
     w("Floor day for eating, when nothing goes to plan: "
-      + ", ".join(f"{q:g} x {n}" if q != 1 else n for n, q in fl)
+      + ", ".join(units.amount(n, q, foods[n]) for n, q in fl)
       + f". That is {ft[0]:.0f} calories and {ft[1]:.0f} g protein.")
     w("")
 
@@ -133,6 +194,55 @@ def render(p, plan, foods, lib):
     w("")
     w("# Appendix")
     w("")
+    w("## Why this plan and not another")
+    w("")
+    w("Recorded as the engine decided, not written afterwards. Each entry names "
+      "the rule that made the call so you can go and read it.")
+    w("")
+    for x in ledger.build(p, plan, tk, s["weekly"], v):
+        w(f"**{x.area}: {x.chose}**")
+        w("")
+        w(x.because)
+        if x.rejected:
+            w("")
+            w(f"*{x.rejected}*")
+        w("")
+        w(f"Rule: `{x.rule}`")
+        w("")
+
+    w("## Every food, and what is in it")
+    w("")
+    w("Swap anything for something with the same numbers. The column adds up as printed.")
+    w("")
+    for label, day in (("Training day", plan["day"]), ("Rest day", plan["day_rest"])):
+        w(f"**{label}**")
+        w("")
+        w("| Time | Food | Made of | kcal | Protein | Fat | Carbs |")
+        w("|---|---|---|---|---|---|---|")
+        dk = dp = df = dc = 0
+        for slot, items in day.items():
+            mk = mp = mf = mc = 0
+            first = True
+            for n, q in items:
+                m = units.macros(q, foods[n])
+                k, p_, f_, c_ = round(m[0]), round(m[1], 1), round(m[2], 1), round(m[3])
+                mk += k; mp = round(mp + p_, 1); mf = round(mf + f_, 1); mc += c_
+                made = foods[n].get("made_of", "")
+                w(f"| {slot if first else ''} | {units.amount(n, q, foods[n])} | {made} "
+                  f"| {k} | {p_:g} | {f_:g} | {c_} |")
+                first = False
+            w(f"| | **{slot.split(' ', 1)[-1]} total** | | **{mk}** | **{mp:g}** "
+              f"| **{mf:g}** | **{mc}** |")
+            dk += mk; dp = round(dp + mp, 1); df = round(df + mf, 1); dc += mc
+        w(f"| | **Whole day** | | **{dk}** | **{dp:g}** | **{df:g}** | **{dc}** |")
+        w(f"| | Must be | | see The 24 weeks | at least {pf} | at least "
+          f"{physio.fat_floor_g(p)} | whatever is left |")
+        w("")
+    w(f"The protein and fat floors apply every day. The calorie number changes by "
+      f"block, so read it from The 24 weeks table. Aim for {pt} g protein rather "
+      f"than the {pf} g floor when the day allows it.")
+    w("")
+
     w("## Where the numbers come from")
     w("")
     w(f"- Basal rate {physio.bmr(p):.0f} calories, from the Mifflin-St Jeor "
@@ -143,7 +253,6 @@ def render(p, plan, foods, lib):
       f"{s['kcal']:.0f} is a deficit of {s['tdee']-s['kcal']:.0f} a day, which is "
       f"{s['loss']:.2f} kg a week against a cap of "
       f"{physio.max_weekly_loss_kg(p)} kg.")
-    pf, pt = physio.protein_target_g(p)
     w(f"- Protein floor {pf} g and target {pt} g. In an energy deficit the "
       f"fat-free-mass response is linear to at least 1.9 g per kg of bodyweight "
       f"with no plateau found, and the effect is stronger for men and for "

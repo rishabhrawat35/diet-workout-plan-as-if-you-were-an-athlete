@@ -8,7 +8,7 @@ Exit 0 clean, 1 violations, 2 refusal. Violations are reported in precedence
 order, so the first thing printed is always the thing to fix first.
 """
 import argparse, json, sys
-import physio, coherence, blocks, myths, contract
+import physio, coherence, blocks, myths, contract, units
 from resolve import PRECEDENCE, RANK
 
 FREQ_EXEMPT = {"biceps", "triceps", "core", "delts"}
@@ -22,9 +22,24 @@ def load(path):
 def food_totals(items, foods):
     t = [0.0] * 5
     for name, qty in items:
-        for i, v in enumerate(foods[name]["u"]):
-            t[i] += v * qty
+        for i, v in enumerate(units.macros(qty, foods[name])):
+            t[i] += v
     return t
+
+
+def printed_totals(items, foods):
+    """What a reader adding up the printed column would get.
+
+    Rounding each row and then summing is not the same as summing and then
+    rounding. The document must add up as printed or the reader is right and
+    the plan is wrong.
+    """
+    k = p = f = c = 0
+    for name, qty in items:
+        m = units.macros(qty, foods[name])
+        k += round(m[0]); p = round(p + round(m[1], 1), 1)
+        f = round(f + round(m[2], 1), 1); c += round(m[3])
+    return k, p, f, c
 
 
 def run(p, plan, foods, lib):
@@ -81,17 +96,22 @@ def run(p, plan, foods, lib):
                                 f"{p['minutes']} min budget ({n} sets at "
                                 f"{physio.sec_per_set(p)} s)."))
 
-    # ---- meal coherence
-    for slot, items in plan["day"].items():
-        v += [(k, f"{slot}: {m}") for k, m in
-              coherence.meal_problems([tuple(i) for i in items], foods)]
+    # ---- meal coherence, on every day the plan defines
+    days = {"training day": plan["day"]}
+    if "day_rest" in plan:
+        days["rest day"] = plan["day_rest"]
+    for label, day in days.items():
+        for slot, items in day.items():
+            v += [(k, f"{label}, {slot}: {m}") for k, m in
+                  coherence.meal_problems([tuple(i) for i in items], foods)]
 
     # ---- food safety
     limit = {"fridge": 24, "insulated_gelpack": 8}.get(
         p["storage"], (6 if p["ambient_c"] < 22 else 4 if p["ambient_c"] < 27 else 2)
         + (2 if p["storage"] == "insulated" else 0))
     chilled = p["storage"] in ("fridge", "insulated_gelpack")
-    for slot, items in plan["day"].items():
+    for label, day in days.items():
+      for slot, items in day.items():
         if "carried" not in slot:
             continue
         for name, _ in items:
@@ -100,38 +120,59 @@ def run(p, plan, foods, lib):
                 continue
             cap = limit if chilled or "cooked_rice" not in tags else min(limit, 4)
             if p["hold_hours"] > cap:
-                v.append(("safety", f"{slot}: {name} held {p['hold_hours']} h, "
-                                    f"safe limit {cap} h at {p['ambient_c']} C."))
+                v.append(("safety", f"{label}, {slot}: {name} held "
+                                    f"{p['hold_hours']} h, safe limit {cap} h "
+                                    f"at {p['ambient_c']} C."))
 
-    # ---- macros
-    day = [0.0] * 5
-    per = []
-    for items in plan["day"].values():
-        t = food_totals([tuple(i) for i in items], foods)
-        per.append(t[1]); day = [a + b for a, b in zip(day, t)]
-    kcal, prot, fat, carb, fib = day
+    # ---- macros, on every day, with the printed arithmetic checked
     pf, pt = physio.protein_target_g(p)
-    if prot < pf:
-        v.append(("floor", f"Protein {prot:.0f} g under the {pf} g floor."))
-    if fat < physio.fat_floor_g(p):
-        v.append(("floor", f"Fat {fat:.0f} g under the {physio.fat_floor_g(p)} g floor."))
-    if fib < physio.fibre_target_g(kcal) - physio.FIBRE_TOLERANCE_G:
-        v.append(("floor", f"Fibre {fib:.0f} g under the "
-                           f"{physio.fibre_target_g(kcal)} g target."))
-    if abs(prot * 4 + fat * 9 + carb * 4 - kcal) > 25:
-        v.append(("energy", "Macros do not sum to the calorie total."))
-    ok, reached, need, d = physio.distribution_ok(per, p)
-    if not ok:
-        v.append(("distribution", f"Only {reached} sittings reach the {d} g dose, "
-                                  f"need {need}."))
     t_ = physio.tdee(p)
-    wk = (t_ - kcal) * 7 / 7700
+    day_totals = {}
+    for label, dd in days.items():
+        tot = [0.0] * 5
+        per = []
+        for slot, items in dd.items():
+            it = [tuple(i) for i in items]
+            t = food_totals(it, foods)
+            per.append(t[1])
+            tot = [x + y for x, y in zip(tot, t)]
+            # what a reader adding the printed column would get for this meal
+            pk, pp, pfat, pc = printed_totals(it, foods)
+            if abs(pk - t[0]) > 1.5 or abs(pp - t[1]) > 0.25:
+                v.append(("energy", f"{label}, {slot}: the printed rows add to "
+                                    f"{pk} kcal / {pp:g} g protein but the meal "
+                                    f"total says {t[0]:.0f} / {t[1]:.1f}."))
+        kcal, prot, fat, carb, fib = tot
+        day_totals[label] = tot
+        if prot < pf:
+            v.append(("floor", f"{label}: protein {prot:.0f} g under the {pf} g floor."))
+        if fat < physio.fat_floor_g(p):
+            v.append(("floor", f"{label}: fat {fat:.0f} g under the "
+                               f"{physio.fat_floor_g(p)} g floor."))
+        if fib < physio.fibre_target_g(kcal) - physio.FIBRE_TOLERANCE_G:
+            v.append(("floor", f"{label}: fibre {fib:.0f} g under the "
+                               f"{physio.fibre_target_g(kcal)} g target."))
+        if abs(prot * 4 + fat * 9 + carb * 4 - kcal) > 25:
+            v.append(("energy", f"{label}: macros do not sum to the calorie total."))
+        ok, reached, need, d = physio.distribution_ok(per, p)
+        if not ok:
+            v.append(("distribution", f"{label}: only {reached} sittings reach the "
+                                      f"{d} g dose, need {need}."))
+
+    # loss rate is judged on the weekly average, because the activity factor
+    # already averages the training days in
+    tr = day_totals["training day"][0]
+    rs = day_totals.get("rest day", [tr])[0]
+    n_train = p["days"]
+    weekly = (tr * n_train + rs * (7 - n_train)) / 7
+    wk = (t_ - weekly) * 7 / 7700
     if wk > physio.max_weekly_loss_kg(p):
-        v.append(("floor", f"Losing {wk:.2f} kg/week exceeds the "
-                           f"{physio.max_weekly_loss_kg(p)} cap."))
+        v.append(("floor", f"Losing {wk:.2f} kg/week on the weekly average exceeds "
+                           f"the {physio.max_weekly_loss_kg(p)} kg cap."))
+    kcal, prot, fat, carb, fib = day_totals["training day"]
 
     # ---- calendar
-    cal = blocks.calendar(p, kcal, t_)
+    cal = blocks.calendar(p, day_totals["training day"][0], t_)
     v += blocks.problems(cal, p)
 
     # ---- claims
@@ -141,7 +182,8 @@ def run(p, plan, foods, lib):
         v.append(("refusal", f"Banned claim '{claim}' in: {line}"))
 
     return v, dict(sets=sets, freq=freq, kcal=kcal, prot=prot, fat=fat,
-                   carb=carb, fib=fib, per=per, tdee=t_, cal=cal, loss=wk)
+                   carb=carb, fib=fib, tdee=t_, cal=cal, loss=wk,
+                   weekly=weekly, day_totals=day_totals)
 
 
 def main():
@@ -158,8 +200,11 @@ def main():
 
     v, s = run(p, plan, foods, lib)
     print(f"AUDIT -- {p['name']}\n")
-    print(f"  TDEE {s['tdee']:.0f}  intake {s['kcal']:.0f}  "
+    print(f"  TDEE {s['tdee']:.0f}   weekly average intake {s['weekly']:.0f}   "
           f"loss {s['loss']:.2f} kg/wk (cap {physio.max_weekly_loss_kg(p)})")
+    for lbl, t in s["day_totals"].items():
+        print(f"  {lbl:14} {t[0]:>5.0f} kcal  {t[1]:>5.1f} g protein "
+              f"({t[1]/p['kg']:.2f} g/kg)  {t[2]:>4.0f} F  {t[3]:>4.0f} C  {t[4]:>4.1f} fibre")
     print(f"  protein {s['prot']:.0f} g ({s['prot']/p['kg']:.2f} g/kg)  "
           f"fat {s['fat']:.0f} g  carb {s['carb']:.0f} g  fibre {s['fib']:.0f} g")
     print(f"  weekly sets: " + "  ".join(

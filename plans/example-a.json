@@ -231,93 +231,89 @@
     1
    ],
    [
-    "banana 1 medium",
+    "banana",
     1
    ]
   ],
   "08:00 after training": [
    [
-    "whey 1 scoop in water",
+    "whey in water",
     1
    ]
   ],
   "09:00 breakfast, home": [
    [
-    "egg bhurji, 3 whole eggs",
+    "egg bhurji",
     1
    ],
    [
-    "roti 1 medium",
+    "roti",
     2
    ],
    [
-    "egg white 1",
+    "egg white",
     3
    ]
   ],
   "13:00 lunch, carried": [
    [
-    "egg curry, 2 whole eggs",
+    "egg curry",
     1
    ],
    [
-    "egg white 1",
+    "egg white",
     4
    ],
    [
-    "rice cooked 1 katori",
+    "rice",
     0.5
    ],
    [
-    "dal cooked 1 katori",
+    "dal",
     1
    ],
    [
-    "orange 1 medium",
+    "orange",
     1
    ]
   ],
   "17:00 office": [
    [
-    "high-protein milk 250 ml",
-    1
+    "high-protein milk",
+    250
    ],
    [
-    "dry fruits 20 g",
-    1
+    "dry fruits",
+    20
    ],
    [
-    "roasted chana 30 g",
-    1
+    "roasted chana",
+    30
    ]
   ],
   "20:30 dinner, home": [
    [
-    "paneer 100 g",
-    0.5
+    "paneer",
+    50.0
    ],
    [
-    "curd 1 katori",
+    "curd",
     1
    ],
    [
-    "sabji 1 katori",
+    "sabji",
     1
    ],
    [
-    "salad raw 1 bowl",
+    "salad",
     1
    ],
    [
-    "high-protein milk 250 ml",
-    1
+    "high-protein milk",
+    250
    ]
   ]
  },
- "rest_day_changes": [
-  "Drop the 06:45 banana and the 08:00 whey.",
-  "Add 1 katori curd to the 13:00 lunch."
- ],
  "supplements": [
   {
    "item": "Creatine monohydrate",
@@ -342,27 +338,27 @@
  ],
  "floor_day": [
   [
-   "high-protein milk 250 ml",
+   "high-protein milk",
+   500
+  ],
+  [
+   "whey in water",
    2
   ],
   [
-   "whey 1 scoop in water",
-   2
-  ],
-  [
-   "boiled egg 1",
+   "boiled egg",
    6
   ],
   [
-   "roasted chana 30 g",
-   1
+   "roasted chana",
+   30
   ],
   [
-   "roti 1 medium",
+   "roti",
    3
   ],
   [
-   "dal cooked 1 katori",
+   "dal",
    1
   ]
  ],
@@ -375,5 +371,89 @@
   "Equipment occupied: do the next exercise on the list and come back.",
   "Missed a day: do it the next day. Do not merge two sessions into one.",
   "Missed a week: restart at the last deload week, not where you left off."
- ]
+ ],
+ "day_rest": {
+  "06:45 pre-training": [
+   [
+    "black coffee",
+    1
+   ]
+  ],
+  "09:00 breakfast, home": [
+   [
+    "egg bhurji",
+    1
+   ],
+   [
+    "roti",
+    2
+   ],
+   [
+    "egg white",
+    3
+   ]
+  ],
+  "13:00 lunch, carried": [
+   [
+    "egg curry",
+    1
+   ],
+   [
+    "egg white",
+    4
+   ],
+   [
+    "rice",
+    0.5
+   ],
+   [
+    "dal",
+    1
+   ],
+   [
+    "orange",
+    1
+   ]
+  ],
+  "17:00 office": [
+   [
+    "high-protein milk",
+    250
+   ],
+   [
+    "dry fruits",
+    20
+   ],
+   [
+    "roasted chana",
+    30
+   ],
+   [
+    "whey in water",
+    1
+   ]
+  ],
+  "20:30 dinner, home": [
+   [
+    "paneer",
+    50.0
+   ],
+   [
+    "curd",
+    1
+   ],
+   [
+    "sabji",
+    1
+   ],
+   [
+    "salad",
+    1
+   ],
+   [
+    "high-protein milk",
+    250
+   ]
+  ]
+ }
 }

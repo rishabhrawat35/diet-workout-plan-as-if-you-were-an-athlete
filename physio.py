@@ -327,22 +327,28 @@ def unmapped_injuries(p):
 
 # ==================================================== micronutrients
 
+# The first element is what a reader should see, not an internal key. An
+# earlier version printed "epa_dha:" straight into the document.
 PATTERN_RISK = [
-    ("b12", {"dairy", "egg", "meat", "fish"}, "No B12-bearing food in the pattern."),
-    ("epa_dha", {"fish", "algae"},
-     "No preformed EPA or DHA. Plant omega-3 converts at a few per cent."),
-    ("iron_heme", {"meat", "fish"},
-     "No heme iron. Pair non-heme sources with vitamin C."),
-    ("calcium", {"dairy", "fortified", "leafy_greens"},
-     "No substantial calcium source."),
+    ("Vitamin B12", {"dairy", "egg", "meat", "fish"},
+     "Nothing in this food pattern carries B12."),
+    ("Omega-3, the EPA and DHA kind", {"fish", "algae"},
+     "No preformed EPA or DHA here. The plant form converts at a few per cent, "
+     "so a capsule or two fish meals a week is the fix."),
+    ("Iron, the kind from meat", {"meat", "fish"},
+     "No heme iron here. Pair the plant sources with something containing "
+     "vitamin C, which is why there is an orange at lunch."),
+    ("Calcium", {"dairy", "fortified", "leafy_greens"},
+     "No substantial calcium source in this pattern."),
 ]
 
 
 def micronutrient_flags(pattern_tags):
     tags = set(pattern_tags)
     out = [(k, msg) for k, need, msg in PATTERN_RISK if not (tags & need)]
-    out.append(("vitamin_d", "Not reliably present in any diet and dependent on "
-                "sun exposure. Test 25(OH)D, then dose to the result."))
+    out.append(("Vitamin D", "Not reliably present in any diet, and it depends "
+                "on sun exposure rather than food. Get a 25(OH)D blood test, "
+                "then dose to the result."))
     return out
 
 
