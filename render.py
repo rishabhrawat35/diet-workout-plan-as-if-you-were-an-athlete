@@ -66,8 +66,16 @@ def rest_day_diff(plan, foods):
 
 def render(p, plan, foods, lib):
     v, s = run(p, plan, foods, lib)
-    L = []
+    L, emitted = [], set()
     w = L.append
+
+    def mark(*concepts):
+        """Record that this concept was actually written.
+
+        The contract used to be handed a dict built one line before the check,
+        so it could not fail. It now reads what the renderer emitted.
+        """
+        emitted.update(concepts)
 
     w(f"# {p['name']} — training and eating")
     w("")
@@ -76,6 +84,7 @@ def render(p, plan, foods, lib):
     w("")
 
     # ---------------- body
+    mark("split", "exercises", "volume")
     w("## Every week")
     w("")
     w("| Day | Exercise | Sets | Reps |")
@@ -85,10 +94,13 @@ def render(p, plan, foods, lib):
             pair = f" (alternate with {e['pair']})" if e.get("pair") else ""
             w(f"| {day if i == 0 else ''} | {e['name']}{pair} | {e['sets']} | {e['reps']} |")
     w("")
+    mark("proximity")
     w(plan["proximity"])
     w("")
+    mark("warmup")
     w(plan["warmup"])
     w("")
+    mark("progression")
     w(plan["progression"])
     w("")
 
@@ -102,33 +114,26 @@ def render(p, plan, foods, lib):
       for m, n in sorted(tot.items(), key=lambda x: -x[1])))
     w("")
 
-    def printed(day):
-        """Sum the rounded rows, not round the summed rows. The header and the
-        itemised table must show the same numbers or the reader is right and
-        the document is wrong."""
-        k = pr = fa = cb = fb = 0
-        for items in day.values():
-            for n, q in items:
-                m = units.macros(q, foods[n])
-                k += round(m[0]); pr = round(pr + round(m[1], 1), 1)
-                fa = round(fa + round(m[2], 1), 1); cb += round(m[3])
-                fb = round(fb + round(m[4], 1), 1)
-        return k, pr, fa, cb, fb
-
-    tk, tp, tf, tc, tfb = printed(plan["day"])
+    flat = [(n, q) for items in plan["day"].values() for n, q in items]
+    tk, tp, tf, tc, tfb = units.printed_totals(flat, foods)
+    mark("energy", "macros", "meals")
     w("## Every day you train")
     w("")
     w(f"{tk} calories | {tp:g} g protein | {tf:g} g fat | {tc} g carbohydrate | "
       f"{tfb:g} g fibre | {physio.fluid_ml(p)} ml water")
+    mark("fibre_fluid")
     w("")
     w("| Time | Food |")
     w("|---|---|")
     for slot, items in plan["day"].items():
         w(f"| {slot} | " + ", ".join(units.amount(n, q, foods[n]) for n, q in items) + " |")
+        if "after training" in slot or "pre-training" in slot:
+            mark("peri_workout")
     w("")
 
     # The rest day used to be a hand-written sentence that could contradict the
     # data. It is now derived from the two days, so it cannot go stale.
+    mark("training_day")
     w("On days you do not train:")
     for line in rest_day_diff(plan, foods):
         w(f"- {line}")
@@ -143,6 +148,7 @@ def render(p, plan, foods, lib):
         w("")
 
     pf, pt = physio.protein_target_g(p)
+    mark("supplements")
     w("## Supplements")
     w("")
     w("| Item | Dose | When |")
@@ -151,6 +157,7 @@ def render(p, plan, foods, lib):
         w(f"| {s_['item']} | {s_['dose']} | {s_['when']} |")
     w("")
 
+    mark("blocks")
     w("## The 24 weeks")
     w("")
     w("| Weeks | Block | Calories a day |")
@@ -163,6 +170,7 @@ def render(p, plan, foods, lib):
     w(plan["deload_rule"])
     w("")
 
+    mark("measurement")
     w("## Measure")
     w("")
     w("| What | How often | Do this when |")
@@ -177,6 +185,7 @@ def render(p, plan, foods, lib):
       "one week and deload early |")
     w("")
 
+    mark("bad_day", "substitution")
     w("## When the session does not happen")
     w("")
     for line in plan["bad_day"]:
@@ -192,6 +201,7 @@ def render(p, plan, foods, lib):
     # ---------------- appendix
     w("---")
     w("")
+    mark("appendix")
     w("# Appendix")
     w("")
     w("## Why this plan and not another")
@@ -200,6 +210,12 @@ def render(p, plan, foods, lib):
       "the rule that made the call so you can go and read it.")
     w("")
     for x in ledger.build(p, plan, tk, s["weekly"], v):
+        if x.area == "Injuries":
+            mark("contraindicated")
+        if "androgen" in x.rejected:
+            mark("downside")
+        if x.area == "Protein" and "sitting" in x.chose:
+            mark("distribution")
         w(f"**{x.area}: {x.chose}**")
         w("")
         w(x.because)
@@ -267,7 +283,12 @@ def render(p, plan, foods, lib):
       f"week and the eating week are the same week.")
     w("")
 
+    mark("micronutrients")
     w("## What this diet does not supply")
+    w("")
+    w("These are properties of the foods chosen, worked out from what is on the "
+      "plate. They are not enforced: nothing rejects a plan for being low in "
+      "iron. Treat them as what to watch and what to ask a doctor about.")
     w("")
     tags = set()
     for items in plan["day"].values():
@@ -297,6 +318,7 @@ def render(p, plan, foods, lib):
         w(f"| {claim} | {ans} | {conf} |")
     w("")
 
+    mark("excluded")
     w("## Left out on purpose")
     w("")
     w("- Any food, supplement or timing that claims to remove fat from one part "
@@ -313,10 +335,9 @@ def render(p, plan, foods, lib):
       "regain, not new tissue.")
     w("")
 
-    sections = {k: "x" for k in contract.ALL}
-    contract.require(sections)
-    w(f"Checks passed: {0 if not v else len(v)} violations. "
-      f"{len(contract.ALL)} required sections present.")
+    contract.require({k: "written" for k in emitted})
+    w(f"Checks passed: {len(v)} violations. "
+      f"{len(emitted)} of {len(contract.ALL)} required sections written.")
     return "\n".join(L)
 
 

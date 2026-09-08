@@ -74,3 +74,22 @@ def amount(name, q, food):
 def macros(q, food):
     """[kcal, protein, fat, carb, fibre] for this quantity."""
     return [q * v for v in food["per"]]
+
+
+def printed_totals(items, foods):
+    """What a reader adding up the printed column would get.
+
+    Rounding each row then summing is not the same as summing then rounding.
+    Three copies of this existed -- in audit.py, in render.py, and inline in
+    render's table loop -- and all three had to agree or the document
+    contradicted itself.
+    """
+    k = p = f = c = fb = 0
+    for name, q in items:
+        m = macros(q, foods[name])
+        k += round(m[0])
+        p = round(p + round(m[1], 1), 1)
+        f = round(f + round(m[2], 1), 1)
+        c += round(m[3])
+        fb = round(fb + round(m[4], 1), 1)
+    return k, p, f, c, fb

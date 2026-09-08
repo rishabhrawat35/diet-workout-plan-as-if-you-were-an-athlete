@@ -154,9 +154,11 @@ class Myths(unittest.TestCase):
 class NoPersona(unittest.TestCase):
     """Nothing in the engine may be shaped around one individual."""
 
+    # Every module that could carry a person's details. units.py, ledger.py and
+    # severity.py were never covered here; resolve.py is gone.
     CODE = ("physio.py", "coherence.py", "blocks.py", "contract.py",
-            "myths.py", "resolve.py", "audit.py", "render.py",
-            "SKILL.md", "README.md")
+            "myths.py", "severity.py", "units.py", "ledger.py",
+            "audit.py", "render.py", "SKILL.md", "README.md")
 
     # Banned everywhere, no exceptions: health details, employer, home city,
     # local brands, the individual's name. None of these belong in a general

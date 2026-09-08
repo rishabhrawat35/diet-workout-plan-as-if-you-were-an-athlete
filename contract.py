@@ -5,15 +5,18 @@ Every check written before this file was a constraint check -- is this number
 inside its bounds. Not one was a completeness check -- is this section present
 at all. So violations were caught automatically and omissions were not:
 supplements vanished between two rebuilds, post-workout feeding was never
-addressed, dry fruits were dropped during a calorie correction and never
-mentioned again, warm-ups and a progression rule were never written down. Each
-was found in review, one at a time, which is not a review process.
+addressed, warm-ups and a progression rule were never written down. Each was
+found by a reader, one at a time, which is not a review process.
 
-The depth contract existed as prose for several drafts. Prose does not fail a
-build. This does.
+`render.py` records each concept as it writes it and hands that set here. An
+earlier version was handed a dict built one line before the call, so it could
+not fail and the document claimed "23 required sections present" on no evidence.
 """
 
-DIET = {
+# One dict. This was split into DIET / TRAINING / SHARED and only the union was
+# ever read, so the split was decoration.
+ALL = {
+    # eating
     "energy":         "Calorie target and the weekly rate of change it implies.",
     "macros":         "Each macro with the floor it is held to.",
     "distribution":   "Protein across the day's eating occasions.",
@@ -24,9 +27,7 @@ DIET = {
     "micronutrients": "Risks the food pattern creates and the food-first fix.",
     "supplements":    "Every supplement with dose, timing and evidence tier.",
     "downside":       "What happens if the person under-eats this target.",
-}
-
-TRAINING = {
+    # training
     "split":          "Which muscles are trained on which day.",
     "volume":         "Weekly sets per muscle.",
     "exercises":      "Every exercise with sets, reps and the order performed.",
@@ -36,16 +37,12 @@ TRAINING = {
     "substitution":   "What to do when equipment is occupied or unavailable.",
     "contraindicated":"Movements excluded for this person and why.",
     "bad_day":        "What to do on a day when the session cannot be completed.",
-}
-
-SHARED = {
+    # both
     "blocks":         "The week-by-week calendar, training and eating together.",
     "measurement":    "What to measure, how often, and the trigger that changes the plan.",
     "excluded":       "What was left out and the rule it would have broken.",
     "appendix":       "Reasoning, evidence tiers and standing answers.",
 }
-
-ALL = {**DIET, **TRAINING, **SHARED}
 
 
 class Incomplete(Exception):

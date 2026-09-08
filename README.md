@@ -217,7 +217,7 @@ Four review layers run over every plan before you see it. They look at different
 
 **⚠️ Problems found — they get fixed and re-checked, and you never see this**
 
-<img src="docs/audit-fail.png" width="820" alt="The checker reporting ten violations in severity order">
+<img src="docs/audit-fail.png" width="820" alt="The checker reporting fifteen violations in severity order">
 
 **✅ Nothing wrong — the plan gets written**
 
@@ -336,7 +336,7 @@ Built separately they contradict. An earlier version put the diet break in week 
 | `blocks.py` | The 24 week calendar, and making eating follow training |
 | `contract.py` | The 23 sections a plan must have |
 | `myths.py` | Answers to 19 claims; 12 phrases that can never be printed |
-| `resolve.py` | Severity order, and the review loops |
+| `severity.py` | How bad a problem is, and therefore which one gets fixed first |
 | `audit.py` | Runs every check |
 | `render.py` | Writes the document |
 | `SKILL.md` | What Claude follows to run all of it |
@@ -348,16 +348,10 @@ Early versions only asked *is this number allowed*. None asked *is this section 
 
 `contract.py` fixes it: 23 required sections, each with a test that removes it and confirms the plan gets rejected.
 
-## 🔄 Review loops that cannot get stuck
-
-`resolve.py` settles one severity level, locks it, moves down. A later level cannot reopen an earlier one. Every round must measurably improve the plan, so two fixes that undo each other are rejected rather than repeating. Total work is capped regardless of how the reviewers behave.
-
-The loop takes reviewers as arguments — it does not ship named ones. The four layers above are implemented as rule functions in `physio.py` and `coherence.py`, not as separate agents.
-
 ## 🧪 Tests
 
 ```bash
-python3 -m unittest discover -p 'test_*.py'   # 71 tests
+python3 -m unittest discover -p 'test_*.py'   # 90 tests
 ```
 
 Most exist because something was already broken when it shipped.
@@ -368,6 +362,7 @@ Most exist because something was already broken when it shipped.
 - Alcohol, eating out, and social meals are not in it.
 - Medication and medical conditions are not in it. Thyroid problems, insulin resistance and several common drugs change everything here, and it cannot see any of them.
 - How much you like a food is a guess until you replace it with your own rating.
+- Variety is not checked. A check existed but assumed a seven-day rotation, and the plan models two day types, so it flagged an identical breakfast on two training days as monotony. It was deleted rather than left dead. Rotating within dal and sabji is offered in the plan; nothing enforces it.
 
 ---
 

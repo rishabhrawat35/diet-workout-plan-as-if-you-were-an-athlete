@@ -251,6 +251,27 @@ def androgen_factors(p, fat_g, kcal):
     return out
 
 
+# ==================================================== food safety
+
+def carried_hold_limit_h(p):
+    """Hours a perishable carried meal stays safe.
+
+    Was computed inline in two places -- audit.py and ledger.py -- so the plan
+    and its own explanation could disagree after a one-line edit to either.
+    """
+    if p["storage"] == "fridge":
+        return 24
+    if p["storage"] == "insulated_gelpack":
+        return 8
+    base = 6 if p["ambient_c"] < 22 else 4 if p["ambient_c"] < 27 else 2
+    return base + (2 if p["storage"] == "insulated" else 0)
+
+
+def chilled(p):
+    """Actively cooled, which is what lifts the tighter cap on cooked rice."""
+    return p["storage"] in ("fridge", "insulated_gelpack")
+
+
 # ==================================================== body composition
 
 def waist_height_flag(p):
@@ -336,8 +357,8 @@ PATTERN_RISK = [
      "No preformed EPA or DHA here. The plant form converts at a few per cent, "
      "so a capsule or two fish meals a week is the fix."),
     ("Iron, the kind from meat", {"meat", "fish"},
-     "No heme iron here. Pair the plant sources with something containing "
-     "vitamin C, which is why there is an orange at lunch."),
+     "No heme iron here. Plant iron absorbs better alongside vitamin C and "
+     "worse alongside a large dose of calcium in the same meal."),
     ("Calcium", {"dairy", "fortified", "leafy_greens"},
      "No substantial calcium source in this pattern."),
 ]

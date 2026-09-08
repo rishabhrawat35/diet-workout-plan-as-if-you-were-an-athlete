@@ -114,7 +114,7 @@
    "masoor",
    "urad"
   ],
-  "made_of": "about 30 g raw dal, 1 tsp oil in the tempering"
+  "made_of": "about 30 g raw dal, tempered with oil once for the whole pot"
  },
  "sabji": {
   "unit": "katori",
@@ -223,10 +223,10 @@
  "paneer": {
   "unit": "g",
   "per": [
-   2.65,
+   2.96,
    0.18,
-   0.2,
-   0.03,
+   0.22,
+   0.032,
    0
   ],
   "role": "wet",
@@ -238,7 +238,7 @@
    "dairy",
    "perishable"
   ],
-  "made_of": "full fat paneer, pan tossed with 1 tsp oil"
+  "made_of": "full fat paneer"
  },
  "curd": {
   "unit": "katori",

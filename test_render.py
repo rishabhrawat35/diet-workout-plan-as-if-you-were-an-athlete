@@ -33,14 +33,40 @@ class FoodData(unittest.TestCase):
                 self.assertGreaterEqual(v, 0, name)
 
     def test_per_unit_macros_are_internally_consistent(self):
-        """kcal must be within 12% of 4/9/4 on the macros, or a number is wrong."""
+        """kcal must be within 12% of 4/9/4 on the macros, or a number is wrong.
+
+        The skip below used to be `k < 5` for every food, which excused every
+        per-gram and per-millilitre entry in the file, because a gram of anything
+        is under 5 kcal. A per-gram vector is just a scaled serving, so its ratio
+        is as meaningful as any other; only a whole serving that is genuinely near
+        zero, like a cup of black coffee, is exempt.
+
+        This is not the check that caught paneer. Paneer's old vector was
+        internally consistent to within 0.4% -- calories and fat were understated
+        together, so the arithmetic agreed with itself while both numbers were
+        wrong. Only the description gave it away, which is `check_composition`'s
+        job, not this one. The skip was a real hole regardless, and is closed here.
+        """
         for name, f in FOODS.items():
             k, p, fa, c, _ = f["per"]
-            if k < 5:
+            if k < 5 and f["unit"] not in ("g", "ml"):
                 continue
             implied = p * 4 + fa * 9 + c * 4
             self.assertLess(abs(implied - k) / k, 0.12,
                             f"{name}: {k} kcal but macros imply {implied:.1f}")
+
+
+    def test_a_per_gram_food_does_not_claim_a_per_serving_quantity(self):
+        """paneer said "pan tossed with 1 tsp oil" while priced by the gram."""
+        import coherence
+        self.assertTrue(coherence.check_composition(FOODS))
+
+        planted = dict(FOODS)
+        planted["paneer"] = dict(FOODS["paneer"],
+                                 made_of="full fat paneer, pan tossed with 1 tsp oil")
+        with self.assertRaises(ValueError) as e:
+            coherence.check_composition(planted)
+        self.assertIn("1 tsp", str(e.exception))
 
 
 class Wording(unittest.TestCase):

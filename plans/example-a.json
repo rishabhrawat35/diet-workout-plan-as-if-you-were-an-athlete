@@ -253,6 +253,10 @@
    [
     "egg white",
     3
+   ],
+   [
+    "curd",
+    1
    ]
   ],
   "13:00 lunch, carried": [
@@ -295,10 +299,6 @@
    [
     "paneer",
     50.0
-   ],
-   [
-    "curd",
-    1
    ],
    [
     "sabji",
@@ -391,6 +391,10 @@
    [
     "egg white",
     3
+   ],
+   [
+    "curd",
+    1
    ]
   ],
   "13:00 lunch, carried": [
@@ -437,10 +441,6 @@
    [
     "paneer",
     50.0
-   ],
-   [
-    "curd",
-    1
    ],
    [
     "sabji",

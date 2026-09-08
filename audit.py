@@ -9,7 +9,7 @@ order, so the first thing printed is always the thing to fix first.
 """
 import argparse, json, sys
 import physio, coherence, blocks, myths, contract, units
-from resolve import PRECEDENCE, RANK
+from severity import PRECEDENCE
 
 FREQ_EXEMPT = {"biceps", "triceps", "core", "delts"}
 
@@ -28,18 +28,8 @@ def food_totals(items, foods):
 
 
 def printed_totals(items, foods):
-    """What a reader adding up the printed column would get.
-
-    Rounding each row and then summing is not the same as summing and then
-    rounding. The document must add up as printed or the reader is right and
-    the plan is wrong.
-    """
-    k = p = f = c = 0
-    for name, qty in items:
-        m = units.macros(qty, foods[name])
-        k += round(m[0]); p = round(p + round(m[1], 1), 1)
-        f = round(f + round(m[2], 1), 1); c += round(m[3])
-    return k, p, f, c
+    """One home for this, in units.py. Kept as a name audit.py already used."""
+    return units.printed_totals(items, foods)[:4]
 
 
 def run(p, plan, foods, lib):
@@ -50,6 +40,8 @@ def run(p, plan, foods, lib):
         print(f"REFUSED\n\n  {stop}\n")
         sys.exit(2)
     physio.require_context(p)
+    coherence.check_roles(foods)
+    coherence.check_composition(foods)
 
     # ---- training volume
     sets, freq = {}, {}
@@ -73,7 +65,8 @@ def run(p, plan, foods, lib):
         if freq[m] < 2 and pri:
             v.append(("floor", f"{m} is a priority trained {freq[m]}x/week."))
         if sets[m] > hi:
-            v.append(("variety", f"{m} at {sets[m]:.1f} sets is past the {hi} ceiling."))
+            v.append(("floor", f"{m} at {sets[m]:.1f} sets is past the {hi} set "
+                               f"ceiling for this training age."))
     for pr in p["priorities"]:
         if sets.get(pr, 0) < pmin:
             v.append(("floor", f"{pr} is a priority with {sets.get(pr,0):.1f} sets/week, "
@@ -104,12 +97,13 @@ def run(p, plan, foods, lib):
         for slot, items in day.items():
             v += [(k, f"{label}, {slot}: {m}") for k, m in
                   coherence.meal_problems([tuple(i) for i in items], foods)]
+        v += [(k, f"{label}: {m}") for k, m in
+              coherence.clustering_problems(
+                  {s: [tuple(i) for i in it] for s, it in day.items()}, foods)]
 
     # ---- food safety
-    limit = {"fridge": 24, "insulated_gelpack": 8}.get(
-        p["storage"], (6 if p["ambient_c"] < 22 else 4 if p["ambient_c"] < 27 else 2)
-        + (2 if p["storage"] == "insulated" else 0))
-    chilled = p["storage"] in ("fridge", "insulated_gelpack")
+    limit = physio.carried_hold_limit_h(p)
+    chilled = physio.chilled(p)
     for label, day in days.items():
       for slot, items in day.items():
         if "carried" not in slot:
@@ -170,6 +164,20 @@ def run(p, plan, foods, lib):
         v.append(("floor", f"Losing {wk:.2f} kg/week on the weekly average exceeds "
                            f"the {physio.max_weekly_loss_kg(p)} kg cap."))
     kcal, prot, fat, carb, fib = day_totals["training day"]
+
+    # ---- the floor day, which the document states calories and protein for
+    if "floor_day" in plan:
+        fl = [tuple(i) for i in plan["floor_day"]]
+        ft = food_totals(fl, foods)
+        if ft[1] < pf:
+            v.append(("floor", f"The floor day gives {ft[1]:.0f} g protein, under "
+                               f"the {pf} g floor. It is the day someone falls back "
+                               f"on, so it is the last one that should miss."))
+        pk, pp, _, _ = printed_totals(fl, foods)
+        if abs(pk - ft[0]) > 1.5 or abs(pp - ft[1]) > 0.25:
+            v.append(("energy", f"The floor day's printed items add to {pk} kcal / "
+                                f"{pp:g} g protein, not the {ft[0]:.0f} / {ft[1]:.1f} "
+                                f"the document states."))
 
     # ---- calendar
     cal = blocks.calendar(p, day_totals["training day"][0], t_)

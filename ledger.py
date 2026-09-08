@@ -51,6 +51,7 @@ NARRATED = {
     "deficit_stop_waist_cm", "caffeine_cutoff_h_before_bed",
     "volume_bounds", "priority_min_sets", "sec_per_set", "session_minutes",
     "banned_movements", "waist_height_flag", "healthy_bodyfat_range",
+    "carried_hold_limit_h", "chilled",
     "life_stage_stop", "micronutrient_flags", "androgen_factors",
     "unmapped_injuries", "refer_out", "distribution_ok",
 }
@@ -175,14 +176,13 @@ def build(p, plan, day_kcal, weekly_kcal, violations=()):
             "physio.unmapped_injuries")
 
     # ------------------------------------------------------------- logistics
-    limit = {"fridge": 24, "insulated_gelpack": 8}.get(
-        p["storage"], (6 if p["ambient_c"] < 22 else 4 if p["ambient_c"] < 27 else 2))
+    limit = physio.carried_hold_limit_h(p)
     add("Food safety", f"Carried food eaten within {limit} hours",
         f"At {p['ambient_c']} C with {STORAGE_WORDS[p['storage']]}, and you hold "
         f"lunch for {p['hold_hours']} hours.",
         "Cooked rice is capped tighter unless it is actively chilled, because "
         "the spores that matter survive cooking.",
-        "audit.py food safety check")
+        "physio.carried_hold_limit_h, physio.chilled")
 
     # ---------------------------------------------------------- body and sex
     r, flag = physio.waist_height_flag(p)
