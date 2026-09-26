@@ -45,13 +45,16 @@ class Coverage(unittest.TestCase):
         self.assertEqual(ledger.NARRATED & ledger.NOT_DECISIONS, set())
 
     def test_the_intake_gate_is_the_only_thing_excused(self):
-        self.assertEqual(ledger.NOT_DECISIONS, {"missing_context", "require_context"})
+        self.assertEqual(ledger.NOT_DECISIONS,
+                         {"missing_context", "require_context",
+                          "check_goals", "size_goals",
+                          "strength_goals"})
 
 
 class Entries(unittest.TestCase):
 
     def setUp(self):
-        self.e = ledger.build(prof(), plan(), 2307, 2277)
+        self.e = ledger.build(prof(), plan(), 2307, 2277, True)
 
     def test_every_entry_is_complete(self):
         for x in self.e:
@@ -84,7 +87,7 @@ class Entries(unittest.TestCase):
             self.assertNotIn(key, text, f"raw key '{key}' leaked")
 
     def test_a_violation_is_recorded_when_one_fired(self):
-        e = ledger.build(prof(), plan(), 2307, 2277,
+        e = ledger.build(prof(), plan(), 2307, 2277, True,
                          violations=[("floor", "protein under the floor")])
         checks = [x for x in e if x.area == "Checks"]
         self.assertEqual(len(checks), 1)
@@ -96,14 +99,14 @@ class Entries(unittest.TestCase):
         self.assertIn("passed every check", checks[0].chose)
 
     def test_a_different_person_gets_a_different_record(self):
-        b = ledger.build(prof("example-b"), plan(), 1795, 1795)
+        b = ledger.build(prof("example-b"), plan(), 1795, 1795, False)
         a_text = " ".join(x.chose for x in self.e)
         b_text = " ".join(x.chose for x in b)
         self.assertNotEqual(a_text, b_text)
 
     def test_an_unmapped_injury_is_recorded_not_swallowed(self):
         p = prof(); p["injuries"] = ["torn meniscus"]
-        e = ledger.build(p, plan(), 2307, 2277)
+        e = ledger.build(p, plan(), 2307, 2277, True)
         self.assertTrue(any("torn meniscus" in x.chose for x in e))
 
 

@@ -42,11 +42,14 @@ class Entry:
 # in test_ledger.py compares this against what physio.py actually exposes.
 # Functions that are not decisions and are deliberately not narrated. Listing
 # them is what stops "not narrated" and "forgotten" looking the same.
-NOT_DECISIONS = {"missing_context", "require_context"}
+# Functions that decide nothing: they gate, or they read a field back out.
+# A rule that picks a number must be narrated; these pick none.
+NOT_DECISIONS = {"missing_context", "require_context",
+                 "check_goals", "size_goals", "strength_goals"}
 
 NARRATED = {
     "bmr", "activity_factor", "tdee", "cooking_fat_g",
-    "protein_target_g", "fat_floor_g", "dose_g", "fibre_target_g", "fluid_ml",
+    "in_deficit", "tracked_lifts", "protein_target_g", "fat_floor_g", "dose_g", "fibre_target_g", "fluid_ml",
     "deload_every_weeks", "diet_break_due_weeks", "max_weekly_loss_kg",
     "deficit_stop_waist_cm", "caffeine_cutoff_h_before_bed",
     "volume_bounds", "priority_min_sets", "sec_per_set", "session_minutes",
@@ -57,7 +60,7 @@ NARRATED = {
 }
 
 
-def build(p, plan, day_kcal, weekly_kcal, violations=()):
+def build(p, plan, day_kcal, weekly_kcal, deficit, violations=()):
     """Every decision, in the order it shapes the plan."""
     e, tdee = [], physio.tdee(p)
     add = lambda *a, **k: e.append(Entry(*a, **k))
@@ -85,11 +88,14 @@ def build(p, plan, day_kcal, weekly_kcal, violations=()):
         "physio.cooking_fat_g")
 
     # ---------------------------------------------------------------- macros
-    pf, pt = physio.protein_target_g(p)
+    pf, pt = physio.protein_target_g(p, deficit)
     add("Protein", f"{pf} g floor, {pt} g target",
-        f"You are in a deficit, where the fat-free-mass response rises linearly "
-        f"to at least 1.9 g per kg with no plateau found. At {p['kg']:.0f} kg "
-        f"that is {pf} g.",
+        (f"Your plan feeds less than you burn, and in a deficit the "
+         f"fat-free-mass response rises linearly to at least 1.9 g per kg with "
+         f"no plateau found. At {p['kg']:.0f} kg that is {pf} g."
+         if deficit else
+         f"Your plan feeds at or above what you burn, so the floor is the "
+         f"maintenance one of 1.6 g per kg. At {p['kg']:.0f} kg that is {pf} g."),
         f"Not the 1.6 g per kg that applies at maintenance. The effect is "
         f"stronger for men and for programmes past four weeks, and this runs 24.",
         "physio.protein_target_g")
@@ -145,10 +151,10 @@ def build(p, plan, day_kcal, weekly_kcal, violations=()):
         f"Beginners grow on less and tolerate less.",
         "", "physio.volume_bounds")
 
-    if p.get("priorities"):
+    if physio.size_goals(p):
         add("Volume", f"At least {physio.priority_min_sets(p)} sets for "
-                      f"{', '.join(p['priorities'])}",
-            f"You named them priorities, so they carry a floor "
+                      f"{', '.join(physio.size_goals(p))}",
+            f"You set a size goal on them, so they carry a floor "
             f"{physio.priority_min_sets(p) - lo} sets above the general minimum.",
             "Not the general floor. A muscle named as a priority and trained at "
             "the general minimum was a priority in the intent only.",
@@ -183,6 +189,17 @@ def build(p, plan, day_kcal, weekly_kcal, violations=()):
         "Cooked rice is capped tighter unless it is actively chilled, because "
         "the spores that matter survive cooking.",
         "physio.carried_hold_limit_h, physio.chilled")
+
+    lifts = physio.tracked_lifts(p, plan)
+    add("Measurement", f"Track the top set on {', '.join(lifts)}",
+        (f"You set a strength goal on {', '.join(lifts)}."
+         if physio.strength_goals(p) else
+         f"No strength goal was set, so the two compound lifts carrying the most "
+         f"sets in your own plan stand in. Their top set moves before anything "
+         f"else does."),
+        "These are read out of the plan. The previous version named two fixed "
+        "lifts, which was a claim about a plan the engine had not looked at.",
+        "physio.tracked_lifts")
 
     # ---------------------------------------------------------- body and sex
     r, flag = physio.waist_height_flag(p)

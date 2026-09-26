@@ -42,6 +42,7 @@ def run(p, plan, foods, lib):
     physio.require_context(p)
     coherence.check_roles(foods)
     coherence.check_composition(foods)
+    physio.check_goals(p)
 
     # ---- training volume
     sets, freq = {}, {}
@@ -58,16 +59,17 @@ def run(p, plan, foods, lib):
                     freq[s2] = freq.get(s2, 0) + 1; seen.add(s2)
     lo, hi = physio.volume_bounds(p)
     pmin = physio.priority_min_sets(p)
+    goals = physio.size_goals(p)
     for m in sorted(sets, key=lambda x: -sets[x]):
         if m in FREQ_EXEMPT:
             continue
-        pri = m in p["priorities"]
+        pri = m in goals
         if freq[m] < 2 and pri:
             v.append(("floor", f"{m} is a priority trained {freq[m]}x/week."))
         if sets[m] > hi:
             v.append(("floor", f"{m} at {sets[m]:.1f} sets is past the {hi} set "
                                f"ceiling for this training age."))
-    for pr in p["priorities"]:
+    for pr in goals:
         if sets.get(pr, 0) < pmin:
             v.append(("floor", f"{pr} is a priority with {sets.get(pr,0):.1f} sets/week, "
                                f"under the {pmin} floor."))
@@ -119,9 +121,16 @@ def run(p, plan, foods, lib):
                                     f"at {p['ambient_c']} C."))
 
     # ---- macros, on every day, with the printed arithmetic checked
-    pf, pt = physio.protein_target_g(p)
+    #
+    # Two passes, because the protein floor depends on whether the person is in
+    # an energy deficit, and that is a fact about the whole week's eating. It
+    # used to be a profile field an author set by hand, which meant the field
+    # and the arithmetic could disagree and nothing objected: example-b declared
+    # a deficit while its plan fed a 498 calorie surplus, and drew the deficit
+    # protein floor anyway.
     t_ = physio.tdee(p)
     day_totals = {}
+    protein_per_sitting = {}
     for label, dd in days.items():
         tot = [0.0] * 5
         per = []
@@ -136,8 +145,15 @@ def run(p, plan, foods, lib):
                 v.append(("energy", f"{label}, {slot}: the printed rows add to "
                                     f"{pk} kcal / {pp:g} g protein but the meal "
                                     f"total says {t[0]:.0f} / {t[1]:.1f}."))
-        kcal, prot, fat, carb, fib = tot
         day_totals[label] = tot
+        protein_per_sitting[label] = per
+
+    in_deficit = physio.in_deficit(p, day_totals, t_)
+    pf, pt = physio.protein_target_g(p, in_deficit)
+
+    for label, tot in day_totals.items():
+        kcal, prot, fat, carb, fib = tot
+        per = protein_per_sitting[label]
         if prot < pf:
             v.append(("floor", f"{label}: protein {prot:.0f} g under the {pf} g floor."))
         if fat < physio.fat_floor_g(p):
@@ -180,8 +196,12 @@ def run(p, plan, foods, lib):
                                 f"the document states."))
 
     # ---- calendar
+    # blocks.problems used to run here. It checked the calendar that
+    # blocks.build had just constructed, against properties build guarantees by
+    # construction, so it could not fire: a sweep of 10,416 profiles raised
+    # nothing. Those invariants are now asserted in test_physio.Blocks over the
+    # same sweep, where a change to build is caught at test time instead.
     cal = blocks.calendar(p, day_totals["training day"][0], t_)
-    v += blocks.problems(cal, p)
 
     # ---- claims
     lines = ([e["name"] for exs in plan["week"].values() for e in exs]
@@ -193,6 +213,7 @@ def run(p, plan, foods, lib):
     # them per day, and the line that reprinted them said nothing the row above
     # had not already said.
     return v, dict(sets=sets, freq=freq, kcal=kcal, fat=fat,
+                   in_deficit=in_deficit,
                    tdee=t_, cal=cal, loss=wk,
                    weekly=weekly, day_totals=day_totals)
 

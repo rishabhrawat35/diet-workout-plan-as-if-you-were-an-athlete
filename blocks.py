@@ -72,33 +72,3 @@ def calendar(p, base_kcal, tdee_kcal, weeks=24):
                                    base_kcal, tdee_kcal)
         rows.append({**b, "kcal": kcal, "note": why})
     return rows
-
-
-def problems(rows, p, weeks=24):
-    out = []
-    kinds = [r["kind"] for r in rows]
-    if "deload" not in kinds:
-        out.append(("floor", "No deload anywhere in the programme."))
-    if (p.get("detrained") or p.get("injuries")) and "reintroduction" not in kinds:
-        out.append(("floor", "Detrained or injured, but no reintroduction block."))
-    if not any(r.get("diet_break") for r in rows):
-        out.append(("floor", "No diet break in a programme this long."))
-    for r in rows:
-        if r.get("diet_break") and r["kind"] != "deload":
-            out.append(("coherence", f"Diet break at week {r['from']} does not "
-                        f"coincide with a deload."))
-    gap = physio.deload_every_weeks(p)
-    run = 0
-    for r in rows:
-        span = r["to"] - r["from"] + 1
-        if r["kind"] == "deload":
-            run = 0
-        elif r["kind"] != "reintroduction":
-            run += span
-            if run > gap:
-                out.append(("floor", f"{run} straight hard weeks by week "
-                            f"{r['to']}, against a {gap} week limit."))
-    total = sum(r["to"] - r["from"] + 1 for r in rows)
-    if total != weeks:
-        out.append(("coherence", f"Blocks cover {total} weeks, not {weeks}."))
-    return out

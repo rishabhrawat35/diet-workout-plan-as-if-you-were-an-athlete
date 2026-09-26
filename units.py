@@ -97,3 +97,13 @@ def printed_totals(items, foods):
         c += round(m[3])
         fb = round(fb + round(m[4], 1), 1)
     return k, p, f, c, fb
+
+
+def join_words(items):
+    """a, b and c -- the list joined the way a sentence joins it."""
+    items = list(items)
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    return ", ".join(items[:-1]) + " and " + items[-1]

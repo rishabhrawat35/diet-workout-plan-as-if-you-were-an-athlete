@@ -8,7 +8,6 @@
  "sleep_h": 7.0,
  "training_age_yrs": 5,
  "detrained": true,
- "deficit": true,
  "medically_cleared": true,
  "chest_tissue_unassessed": true,
  "job": "desk",
@@ -30,10 +29,19 @@
  "injuries": [
   "lumbar disc, currently pain-free"
  ],
- "priorities": [
-  "calves",
-  "chest",
-  "glutes"
+ "goals": [
+  {
+   "want": "size",
+   "of": "calves"
+  },
+  {
+   "want": "size",
+   "of": "chest"
+  },
+  {
+   "want": "size",
+   "of": "glutes"
+  }
  ],
  "ambient_c": 23,
  "storage": "insulated_gelpack",

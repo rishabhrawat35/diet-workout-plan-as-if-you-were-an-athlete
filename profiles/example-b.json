@@ -8,7 +8,6 @@
  "sleep_h": 6.0,
  "training_age_yrs": 0.5,
  "detrained": false,
- "deficit": true,
  "medically_cleared": true,
  "chest_tissue_unassessed": false,
  "job": "desk",
@@ -30,8 +29,11 @@
  "injuries": [
   "shoulder impingement"
  ],
- "priorities": [
-  "glutes"
+ "goals": [
+  {
+   "want": "size",
+   "of": "glutes"
+  }
  ],
  "ambient_c": 30,
  "storage": "none",

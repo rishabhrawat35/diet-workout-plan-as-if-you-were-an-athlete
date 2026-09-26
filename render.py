@@ -147,7 +147,7 @@ def render(p, plan, foods, lib):
             f"{n} ({', '.join(c)})" for n, c in cats) + ".")
         w("")
 
-    pf, pt = physio.protein_target_g(p)
+    pf, pt = physio.protein_target_g(p, s["in_deficit"])
     mark("supplements")
     w("## Supplements")
     w("")
@@ -170,6 +170,28 @@ def render(p, plan, foods, lib):
     w(plan["deload_rule"])
     w("")
 
+    mark("goals")
+    w("## What you said you are training for")
+    w("")
+    if not p.get("goals"):
+        w("You named no goal. Everything below is the general plan: the floors, "
+          "the safety limits and the volume bounds that apply to everyone. "
+          "Nothing here was tightened for a goal, because none was given.")
+    else:
+        w("| Goal | What the engine did about it |")
+        w("|---|---|")
+        for g in p["goals"]:
+            what = g["want"] + (f" ({g['of']})" if g.get("of") else "")
+            w(f"| {what} | {physio.GOAL_EFFECT[g['want']]} |")
+        w("")
+        if physio.size_goals(p):
+            w(f"Measure {units.join_words(physio.size_goals(p))} with a tape "
+              f"monthly, relaxed, same spot each time. This is a readout, not a "
+              f"check: nothing in this plan is rejected for a limb not growing, "
+              f"and a tape is worth about half a centimetre, which is more than "
+              f"a month of real change.")
+    w("")
+
     mark("measurement")
     w("## Measure")
     w("")
@@ -179,7 +201,8 @@ def render(p, plan, foods, lib):
       f"{physio.deficit_stop_waist_cm(p):g} cm |")
     w("| Bodyweight, morning, 7 day average | Daily, read weekly | Under 0.2 kg "
       "a week for 3 weeks: remove 150 calories. Over 0.7 kg a week: add 150 |")
-    w("| Top set weight on incline press and leg press | Weekly | Falling for 2 "
+    lifts = physio.tracked_lifts(p, plan)
+    w(f"| Top set weight on {units.join_words(lifts)} | Weekly | Falling for 2 "
       "weeks in a row: add 200 calories |")
     w("| Hours slept | Daily | Under 6.5 hours for a week: shorten the block by "
       "one week and deload early |")
@@ -209,7 +232,7 @@ def render(p, plan, foods, lib):
     w("Recorded as the engine decided, not written afterwards. Each entry names "
       "the rule that made the call so you can go and read it.")
     w("")
-    for x in ledger.build(p, plan, tk, s["weekly"], v):
+    for x in ledger.build(p, plan, tk, s["weekly"], s["in_deficit"], v):
         if x.area == "Injuries":
             mark("contraindicated")
         if "androgen" in x.rejected:

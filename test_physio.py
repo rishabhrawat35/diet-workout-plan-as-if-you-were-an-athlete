@@ -15,9 +15,9 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 
 def person(**kw):
     d = dict(sex="m", age=30, kg=80.0, cm=178.0, waist_cm=95.0, sleep_h=7.0,
-             training_age_yrs=5, deficit=True, medically_cleared=True,
+             training_age_yrs=5, medically_cleared=True,
              job="desk", steps=9000, days=5, minutes=60, gym_traffic="shared",
-             equipment=["cable stack"], injuries=[], priorities=["calves"],
+             equipment=["cable stack"], injuries=[], goals=[{"want": "size", "of": "calves"}],
              ambient_c=23, storage="insulated_gelpack", hold_hours=6,
              protein_sources=["egg"], cooking_fat="typical_home",
              eating_occasions=6)
@@ -59,11 +59,11 @@ class Energy(unittest.TestCase):
 
 class Protein(unittest.TestCase):
     def test_deficit_floor_meets_the_breakpoint(self):
-        self.assertAlmostEqual(P.protein_target_g(person(deficit=True))[0] / 80, 1.9, places=2)
+        self.assertAlmostEqual(P.protein_target_g(person(), True)[0] / 80, 1.9, places=2)
 
     def test_older_adults_need_more_not_less(self):
-        self.assertGreater(P.protein_target_g(person(age=65))[0],
-                           P.protein_target_g(person(age=30))[0])
+        self.assertGreater(P.protein_target_g(person(age=65), True)[0],
+                           P.protein_target_g(person(age=30), True)[0])
 
     def test_distribution_needs_enough_sittings_not_all(self):
         self.assertTrue(P.distribution_ok([60, 34, 25, 33, 25, 2], person())[0])
@@ -125,10 +125,105 @@ class Blocks(unittest.TestCase):
         weeks = [w for r in rows for w in range(r["from"], r["to"] + 1)]
         self.assertEqual(weeks, list(range(1, 25)))
 
-    def test_a_flat_calendar_is_rejected(self):
-        bad = [{"from": 1, "to": 24, "kind": "build", "kcal": 2300}]
-        kinds = [k for k, _ in blocks.problems(bad, person(detrained=True))]
-        self.assertIn("floor", kinds)
+    def test_every_calendar_build_can_produce_holds_its_invariants(self):
+        """These were runtime checks in blocks.problems until they were moved here.
+
+        They were checking the output of blocks.build against properties build
+        guarantees by construction, so at runtime they could never fire -- a
+        sweep of 10,416 profiles raised nothing. As tests they are worth
+        keeping: they are what would catch a future edit to build. The sweep is
+        trimmed here to the axes build actually branches on.
+        """
+        import itertools
+        seen = 0
+        for age, ta, sleep, detr, inj in itertools.product(
+                (18, 30, 55, 79), (0, 1, 3, 10), (5.0, 6.4, 7.0, 9.0),
+                (True, False), ([], ["lumbar disc"])):
+            p = person(age=age, training_age_yrs=ta, sleep_h=sleep,
+                       detrained=detr, injuries=inj)
+            rows = blocks.calendar(p, 2300, P.tdee(p))
+            seen += 1
+            kinds = [r["kind"] for r in rows]
+            self.assertIn("deload", kinds, p)
+            if detr or inj:
+                self.assertIn("reintroduction", kinds, p)
+            self.assertTrue(any(r.get("diet_break") for r in rows), p)
+            for r in rows:
+                if r.get("diet_break"):
+                    self.assertEqual(r["kind"], "deload", p)
+            self.assertEqual(sum(r["to"] - r["from"] + 1 for r in rows), 24, p)
+            gap, run = P.deload_every_weeks(p), 0
+            for r in rows:
+                if r["kind"] == "deload":
+                    run = 0
+                elif r["kind"] != "reintroduction":
+                    run += r["to"] - r["from"] + 1
+                    self.assertLessEqual(run, gap, p)
+        self.assertEqual(seen, 256)
+
+
+class GoalsOnlyTighten(unittest.TestCase):
+    """A goal may add a bound. It may never remove one.
+
+    This is the whole safety boundary of personalisation. Without it, a goal
+    field is a place for a user to talk the engine out of its own floors --
+    declare the right thing and the protein floor, the loss rate cap or an
+    injury contraindication quietly stops applying.
+
+    The first version of this test was vacuous, and was caught by planting a
+    goal that raised the loss rate cap to 99 kg a week: the test passed. It ran
+    only against the two shipped profiles, neither of which trips the loss cap,
+    so there was no violation for the planted goal to remove. A monotonicity
+    test proves nothing unless the baseline actually contains the violations a
+    goal could loosen. Hence the stress cases below, and
+    `test_every_protected_severity_is_actually_represented`, which fails if the
+    baseline stops covering them.
+    """
+
+    # profile overrides -> a baseline that trips a different family of bounds
+    CASES = {
+        "clean":  dict(),
+        "unsafe": dict(_profile="example-b"),
+        "starve": dict(kg=110.0, steps=25000, days=6),
+    }
+
+    def _violations(self, overrides, goals):
+        import audit
+        strip = lambda d: {k: v for k, v in d.items() if not k.startswith("_")}
+        o = dict(overrides)
+        name = o.pop("_profile", "example-a")
+        p = audit.load(os.path.join(HERE, f"profiles/{name}.json"))
+        plan = audit.load(os.path.join(HERE, "plans/example-a.json"))
+        foods = strip(audit.load(os.path.join(HERE, "data/foods-india-egg-dairy.json")))
+        lib = strip(audit.load(os.path.join(HERE, "data/exercises-home-gym.json")))
+        v, _ = audit.run(dict(p, goals=goals, **o), plan, foods, lib)
+        return set(v)
+
+    GOALS = ({"want": "size", "of": "calves"},
+             {"want": "size", "of": "chest"},
+             {"want": "fat_loss"},
+             {"want": "endurance"},
+             {"want": "strength", "of": "leg press"})
+
+    def test_adding_a_goal_never_removes_a_violation(self):
+        for case, overrides in self.CASES.items():
+            none = self._violations(overrides, [])
+            for goal in self.GOALS:
+                got = self._violations(overrides, [goal])
+                self.assertTrue(none <= got,
+                                f"{case} with {goal} lost: {sorted(none - got)}")
+            both = self._violations(overrides, list(self.GOALS))
+            self.assertTrue(none <= both, f"{case} with all goals lost violations")
+
+    def test_every_protected_severity_is_actually_represented(self):
+        """Without this the test above can pass by having nothing to lose."""
+        seen = set()
+        for overrides in self.CASES.values():
+            seen |= {k for k, _ in self._violations(overrides, [])}
+        for needed in ("safety", "floor", "energy", "distribution"):
+            self.assertIn(needed, seen,
+                          f"no baseline case raises '{needed}', so a goal that "
+                          f"removed one would not be noticed")
 
 
 class Myths(unittest.TestCase):
@@ -204,7 +299,7 @@ class NoPersona(unittest.TestCase):
         self.assertIsNone(P.life_stage_stop(b))
         with open(os.path.join(HERE, "profiles/example-a.json")) as fh:
             a = json.load(fh)
-        self.assertNotEqual(P.protein_target_g(b), P.protein_target_g(a))
+        self.assertNotEqual(P.protein_target_g(b, True), P.protein_target_g(a, True))
         self.assertLess(P.deload_every_weeks(b), 8)
         self.assertIn("overhead barbell press",
                       [m for m, _ in P.banned_movements(b)])

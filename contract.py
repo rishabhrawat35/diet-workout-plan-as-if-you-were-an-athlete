@@ -16,6 +16,7 @@ not fail and the document claimed "23 required sections present" on no evidence.
 # One dict. This was split into DIET / TRAINING / SHARED and only the union was
 # ever read, so the split was decoration.
 ALL = {
+    "goals": "what the person said they are training for, and what each goal actually changed",
     # eating
     "energy":         "Calorie target and the weekly rate of change it implies.",
     "macros":         "Each macro with the floor it is held to.",

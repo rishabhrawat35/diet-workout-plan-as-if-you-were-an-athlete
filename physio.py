@@ -23,7 +23,7 @@ REQUIRED = {
     "minutes":          "minutes available per session",
     "equipment":        "what the gym actually contains; never assume",
     "injuries":         "injury list, empty list if none",
-    "priorities":       "muscles the person wants prioritised",
+    "goals":            "what the person is training for; [] if they say nothing",
     # eating context
     "ambient_c":        "daytime temperature where food will be held",
     "storage":          "none, insulated, insulated_gelpack or fridge",
@@ -105,13 +105,27 @@ def cooking_fat_g(p):
 
 # ==================================================== macros
 
-def protein_target_g(p):
+def in_deficit(p, day_totals, tdee_kcal):
+    """Whether the plan actually feeds less than the person burns.
+
+    This was a profile field an author set by hand. The field and the plan's own
+    arithmetic could disagree, and nothing compared them: example-b declared a
+    deficit while its plan fed 2293 calories against a TDEE of 1795, and drew
+    the deficit protein floor on a surplus. Derived, they cannot disagree.
+    """
+    tr = day_totals["training day"][0]
+    rs = day_totals.get("rest day", [tr])[0]
+    n = p["days"]
+    return (tr * n + rs * (7 - n)) / 7 < tdee_kcal
+
+
+def protein_target_g(p, deficit):
     """In an energy deficit the fat-free-mass response is linear to at least
     1.9 g/kg bodyweight with no plateau identified, and the effect is stronger
     for men and for interventions over four weeks."""
     kg = p["kg"]
-    floor = 1.9 if p.get("deficit") else 1.6
-    target = 2.1 if p.get("deficit") else 1.8
+    floor = 1.9 if deficit else 1.6
+    target = 2.1 if deficit else 1.8
     if p["age"] >= 60:
         floor += 0.2
         target += 0.2
@@ -197,6 +211,71 @@ def volume_bounds(p):
     if ta < 3:
         return 8, 20
     return 10, 22
+
+
+GOAL_WANTS = ("fat_loss", "size", "strength", "endurance")
+
+# What each goal actually causes. Written here, printed in the document, so a
+# goal cannot be accepted and quietly ignored -- which is what the deleted
+# `enhanced` field did. A `want` with no entry here is refused at load.
+GOAL_EFFECT = {
+    "fat_loss":  "protein floor raised, loss rate capped",
+    "size":      "a weekly set floor above the general minimum, and the muscle "
+                 "trained at least twice a week",
+    "strength":  "the lift is named in the measure table; no set, rep or "
+                 "calorie number changes because of it",
+    "endurance": "nothing. This engine plans resistance training only, and "
+                 "checked nothing for endurance",
+}
+
+
+def check_goals(p):
+    """A goal must be one the engine has a rule for, or it is refused.
+
+    `size` and `strength` name a thing; `fat_loss` and `endurance` name none.
+    An unknown want, or a missing `of`, means the document would print a goal
+    the engine did nothing about.
+    """
+    for g in p.get("goals", []):
+        w = g.get("want")
+        if w not in GOAL_WANTS:
+            raise ValueError(
+                f"unknown goal '{w}'. Known goals: {', '.join(GOAL_WANTS)}.")
+        if w in ("size", "strength") and not g.get("of"):
+            raise ValueError(f"a '{w}' goal must name what it is of.")
+        if w in ("fat_loss", "endurance") and g.get("of"):
+            raise ValueError(f"a '{w}' goal takes no 'of'; got '{g['of']}'.")
+    return True
+
+
+def size_goals(p):
+    """Muscles carrying a size goal. Empty list, never a KeyError."""
+    return [g["of"] for g in p.get("goals", []) if g["want"] == "size"]
+
+
+def strength_goals(p):
+    """Lifts carrying a strength goal. Named in the measure table, nowhere else."""
+    return [g["of"] for g in p.get("goals", []) if g["want"] == "strength"]
+
+
+def tracked_lifts(p, plan, n=2):
+    """Which lifts the measure table tells the reader to watch.
+
+    This used to be the fixed string "incline press and leg press", which is a
+    claim about a plan the engine had not read: swap in a plan containing
+    neither and the document still told the reader to track them. A strength
+    goal names its own lift; otherwise the heaviest-volume compound lifts in the
+    plan stand in, because those are the ones whose top set moves first.
+    """
+    named = [l for l in strength_goals(p)]
+    if named:
+        return named
+    load = {}
+    for exs in plan["week"].values():
+        for e in exs:
+            if e.get("also"):            # compound: it spills onto other muscles
+                load[e["name"]] = load.get(e["name"], 0) + e["sets"]
+    return [k for k, _ in sorted(load.items(), key=lambda x: -x[1])[:n]]
 
 
 def priority_min_sets(p):
