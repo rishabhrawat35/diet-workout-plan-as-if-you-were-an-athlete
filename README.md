@@ -229,7 +229,7 @@ Four review layers run over every plan before you see it. They look at different
 
 ### The order it fixes things in
 
-There are 8 severity levels. A problem lower down can never be fixed by causing one higher up.
+There are 7 severity levels. A problem lower down can never be fixed by causing one higher up.
 
 ```
 1  Refuse             you are pregnant, or your gym has no leg press
@@ -238,8 +238,7 @@ There are 8 severity levels. A problem lower down can never be fixed by causing 
 4  Time and maths     the session does not fit in an hour
 5  Is it a meal       roti with nothing to eat it with
 6  Spreading protein  all of it in one sitting
-7  Boredom            the same food every single day
-8  Do you like it     you will not eat this for 24 weeks
+7  Do you like it     you will not eat this for 24 weeks
 ```
 
 It will not fix "this is boring" by telling you to carry food that spoils.

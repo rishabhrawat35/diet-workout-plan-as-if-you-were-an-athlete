@@ -8,7 +8,7 @@ Exit 0 clean, 1 violations, 2 refusal. Violations are reported in precedence
 order, so the first thing printed is always the thing to fix first.
 """
 import argparse, json, sys
-import physio, coherence, blocks, myths, contract, units
+import physio, coherence, blocks, myths, units
 from severity import PRECEDENCE
 
 FREQ_EXEMPT = {"biceps", "triceps", "core", "delts"}
@@ -189,8 +189,11 @@ def run(p, plan, foods, lib):
     for _, claim, line in myths.scan(lines):
         v.append(("refusal", f"Banned claim '{claim}' in: {line}"))
 
-    return v, dict(sets=sets, freq=freq, kcal=kcal, prot=prot, fat=fat,
-                   carb=carb, fib=fib, tdee=t_, cal=cal, loss=wk,
+    # prot/carb/fib are not returned: day_totals already carries every one of
+    # them per day, and the line that reprinted them said nothing the row above
+    # had not already said.
+    return v, dict(sets=sets, freq=freq, kcal=kcal, fat=fat,
+                   tdee=t_, cal=cal, loss=wk,
                    weekly=weekly, day_totals=day_totals)
 
 
@@ -213,8 +216,6 @@ def main():
     for lbl, t in s["day_totals"].items():
         print(f"  {lbl:14} {t[0]:>5.0f} kcal  {t[1]:>5.1f} g protein "
               f"({t[1]/p['kg']:.2f} g/kg)  {t[2]:>4.0f} F  {t[3]:>4.0f} C  {t[4]:>4.1f} fibre")
-    print(f"  protein {s['prot']:.0f} g ({s['prot']/p['kg']:.2f} g/kg)  "
-          f"fat {s['fat']:.0f} g  carb {s['carb']:.0f} g  fibre {s['fib']:.0f} g")
     print(f"  weekly sets: " + "  ".join(
         f"{m} {n:.0f}" for m, n in sorted(s["sets"].items(), key=lambda x: -x[1])))
     print()

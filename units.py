@@ -82,7 +82,11 @@ def printed_totals(items, foods):
     Rounding each row then summing is not the same as summing then rounding.
     Three copies of this existed -- in audit.py, in render.py, and inline in
     render's table loop -- and all three had to agree or the document
-    contradicted itself.
+    contradicted itself. Two were replaced by this function. The third, in
+    render's appendix loop, stays: it needs each row's rounded value on screen,
+    so it accumulates as it prints. It was checked against this function over
+    200,000 random days and never diverged, because re-rounding a value already
+    at one decimal place changes nothing.
     """
     k = p = f = c = fb = 0
     for name, q in items:

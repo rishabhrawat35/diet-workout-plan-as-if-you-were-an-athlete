@@ -9,7 +9,6 @@
  "training_age_yrs": 0.5,
  "detrained": false,
  "deficit": true,
- "enhanced": false,
  "medically_cleared": true,
  "chest_tissue_unassessed": false,
  "job": "desk",
