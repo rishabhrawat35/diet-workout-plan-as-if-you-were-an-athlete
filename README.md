@@ -310,6 +310,12 @@ python3 render.py --profile profiles/example-a.json --plan plans/example-a.json 
 
 Copy `profiles/example-a.json`, change the values to yours, save it as `profiles/private-you.json`.
 
+If you have a profile from before September 2026, it has `priorities`, `deficit`
+and `enhanced` in it. Replace `priorities: ["calves"]` with
+`goals: [{"want": "size", "of": "calves"}]`, and delete the other two: the
+deficit is now worked out from your own plan, and `enhanced` was never read by
+anything.
+
 ---
 ---
 

@@ -23,7 +23,25 @@ typical hours of sleep, years of consistent training.
 
 **Training.** Days a week they will actually train, minutes per session, how
 busy the gym is (empty, shared, busy), what equipment it actually has, any
-injuries with what aggravates them, which muscles they want prioritised.
+injuries with what aggravates them.
+
+**What they are training for.** Ask openly, not as a menu: what do they want out
+of this? Then write down what they say as goals. There are four kinds the engine
+has rules for.
+
+| They say | Write |
+|---|---|
+| lose fat, lean down, drop the belly | `{"want": "fat_loss"}` |
+| bigger arms, calves, chest, glutes | `{"want": "size", "of": "<muscle>"}` |
+| a bigger squat, bench, deadlift, press | `{"want": "strength", "of": "<lift>"}` |
+| run further, last longer, get fitter | `{"want": "endurance"}` |
+
+More than one is normal and they do not need ranking. "Nothing in particular" is
+a real answer: write `"goals": []` and the plan says plainly that nothing was
+tightened for a goal. Do not invent a goal to fill the field. An `endurance`
+goal is accepted and the document states that this engine plans resistance
+training only and checked nothing for it — say that out loud rather than letting
+them read it later.
 
 **Eating.** Daytime temperature where food will be held, storage available
 (none, insulated, insulated with a gel pack, fridge), hours between packing a
