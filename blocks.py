@@ -54,6 +54,32 @@ def build(p, weeks=24):
 
 # Calories by block. The training plan changes what the body is doing; the diet
 # has to change with it or the two halves contradict each other.
+# What to do differently in each kind of week.
+#
+# Written because the calendar printed "reintroduction" for four weeks and
+# "build" for the rest, and no instruction anywhere in the document differed
+# between them. A block label the reader cannot act on is a claim the plan does
+# not back. Every kind `build()` can emit must have an entry here, and a test
+# fails the build if one does not.
+#
+# These are instructions to the reader, not constraints the audit can check: the
+# plan holds one training week, and that week is the full-volume one. The
+# document says so rather than implying the reduced weeks were audited too.
+BLOCK_INSTRUCTION = {
+    "reintroduction":
+        "Do every exercise listed, at the sets listed, but stop each set with "
+        "3 reps still in you rather than 1 or 2. Do not add weight during these "
+        "weeks even if the reps feel easy.",
+    "build":
+        "Do every exercise listed, at the sets and reps listed, each set stopped "
+        "1 or 2 reps short of form breaking. Add weight whenever an exercise hits "
+        "the top of its rep range on every set for two sessions in a row.",
+    "deload":
+        "Do every exercise listed, at half the sets, at the same weight. Stop "
+        "every set well short of hard.",
+}
+
+
 def kcal_for_block(kind, diet_break, base_kcal, tdee_kcal):
     if diet_break:
         return round(tdee_kcal), "maintenance: eat at TDEE through the break"

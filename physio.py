@@ -220,7 +220,7 @@ GOAL_WANTS = ("fat_loss", "size", "strength", "endurance")
 # `enhanced` field did. A `want` with no entry here is refused at load.
 GOAL_EFFECT = {
     "fat_loss":  "protein floor raised, loss rate capped",
-    "size":      "a weekly set floor above the general minimum, and the muscle "
+    "size":      "more weekly sets than the general minimum, and the muscle "
                  "trained at least twice a week",
     "strength":  "the lift is named in the measure table; no set, rep or "
                  "calorie number changes because of it",

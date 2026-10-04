@@ -160,14 +160,22 @@ def render(p, plan, foods, lib):
     mark("blocks")
     w("## The 24 weeks")
     w("")
-    w("| Weeks | Block | Calories a day |")
-    w("|---|---|---|")
+    w("| Weeks | Block | Calories a day | What to do in these weeks |")
+    w("|---|---|---|---|")
     for b in s["cal"]:
         span = f"{b['from']}" if b['from'] == b['to'] else f"{b['from']}-{b['to']}"
         kind = b["kind"] + (" and diet break" if b.get("diet_break") else "")
-        w(f"| {span} | {kind} | {b['kcal']} |")
+        w(f"| {span} | {kind} | {b['kcal']} | "
+          f"{blocks.BLOCK_INSTRUCTION[b['kind']]} |")
     w("")
-    w(plan["deload_rule"])
+    w("Find today's date against week 1 of your start, read that row, and do what "
+      "the last column says. The training table above is the full-volume week: it "
+      "is what a build week looks like. A reintroduction or deload week runs the "
+      "same exercises with the last column applied on top.")
+    w("")
+    w("Keep a written record of every set: the exercise, the weight, and the reps "
+      "you actually got. Bring the last two sessions' records with you to each "
+      "session.")
     w("")
 
     mark("goals")
@@ -216,7 +224,8 @@ def render(p, plan, foods, lib):
     w("")
     fl = plan["floor_day"]
     ft = food_totals([tuple(i) for i in fl], foods)
-    w("Floor day for eating, when nothing goes to plan: "
+    w("If the day falls apart and you cannot cook or carry anything, eat this "
+      "instead. It is the least that still counts as having eaten: "
       + ", ".join(units.amount(n, q, foods[n]) for n, q in fl)
       + f". That is {ft[0]:.0f} calories and {ft[1]:.0f} g protein.")
     w("")
@@ -359,7 +368,7 @@ def render(p, plan, foods, lib):
     w("")
 
     contract.require({k: "written" for k in emitted})
-    w(f"Checks passed: {len(v)} violations. "
+    w(f"Checks passed: {len(v)} problems found. "
       f"{len(emitted)} of {len(contract.ALL)} required sections written.")
     return "\n".join(L)
 

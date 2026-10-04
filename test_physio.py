@@ -125,6 +125,27 @@ class Blocks(unittest.TestCase):
         weeks = [w for r in rows for w in range(r["from"], r["to"] + 1)]
         self.assertEqual(weeks, list(range(1, 25)))
 
+    def test_every_block_kind_carries_an_instruction(self):
+        """A block label the reader cannot act on is a claim the plan does not back.
+
+        The calendar printed "reintroduction" for four weeks and "build" for the
+        rest, and no instruction anywhere in the document differed between them.
+        """
+        import itertools
+        kinds = set()
+        for age, ta, sleep, detr, inj in itertools.product(
+                (18, 30, 55, 79), (0, 1, 3, 10), (5.0, 6.4, 7.0, 9.0),
+                (True, False), ([], ["lumbar disc"])):
+            p = person(age=age, training_age_yrs=ta, sleep_h=sleep,
+                       detrained=detr, injuries=inj)
+            kinds |= {r["kind"] for r in blocks.calendar(p, 2300, P.tdee(p))}
+        missing = kinds - set(blocks.BLOCK_INSTRUCTION)
+        self.assertEqual(missing, set(),
+                         f"block kinds with no instruction: {sorted(missing)}")
+        unused = set(blocks.BLOCK_INSTRUCTION) - kinds
+        self.assertEqual(unused, set(),
+                         f"instructions for kinds nothing emits: {sorted(unused)}")
+
     def test_every_calendar_build_can_produce_holds_its_invariants(self):
         """These were runtime checks in blocks.problems until they were moved here.
 

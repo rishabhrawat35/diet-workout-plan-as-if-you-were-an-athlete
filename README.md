@@ -306,6 +306,7 @@ Python 3.8 or newer. Nothing to install.
 python3 audit.py  --profile profiles/example-a.json --plan plans/example-a.json
 python3 render.py --profile profiles/example-a.json --plan plans/example-a.json \
                   --out example-a-plan.md
+python3 topdf.py example-a-plan.md example-a-plan.pdf
 ```
 
 Copy `profiles/example-a.json`, change the values to yours, save it as `profiles/private-you.json`.

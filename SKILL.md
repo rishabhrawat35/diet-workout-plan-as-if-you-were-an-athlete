@@ -98,6 +98,12 @@ python3 render.py --profile profiles/private-<name>.json \
                   --out <name>-plan.md
 ```
 
+For a PDF to read away from a screen:
+
+```
+python3 topdf.py <name>-plan.md <name>-plan.pdf
+```
+
 The body is actionable only. All reasoning, evidence tiers, hormone notes and
 standing answers go to the appendix. Do not move them up, and do not add
 justification to the body — a test fails the build if the body contains

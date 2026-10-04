@@ -219,6 +219,6 @@ def build(p, plan, day_kcal, weekly_kcal, deficit, violations=()):
             "", "audit.py")
     else:
         add("Checks", "The plan passed every check on this run",
-            "No violation was raised at any severity.", "", "audit.py")
+            "Nothing in this plan broke a rule the checker enforces.", "", "audit.py")
 
     return e
