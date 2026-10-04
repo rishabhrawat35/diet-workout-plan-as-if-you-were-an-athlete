@@ -47,7 +47,9 @@ class Coverage(unittest.TestCase):
     def test_the_intake_gate_is_the_only_thing_excused(self):
         self.assertEqual(ledger.NOT_DECISIONS,
                          {"missing_context", "require_context",
-                          "check_goals", "size_goals",
+                          "check_goals", "check_enums", "check_activities",
+                          "activity_conflicts",
+                          "required_for", "size_goals",
                           "strength_goals"})
 
 

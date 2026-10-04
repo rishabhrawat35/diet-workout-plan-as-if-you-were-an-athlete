@@ -1,19 +1,19 @@
 {
- "name": "Example A \u2014 30, returning after a back injury",
+ "name": "Example E \u2014 68, man, returning after years off",
  "sex": "m",
- "age": 30,
- "kg": 80.0,
- "cm": 178.0,
- "waist_cm": 95.0,
- "sleep_h": 7.0,
- "training_age_yrs": 5,
+ "age": 68,
+ "kg": 74.0,
+ "cm": 170.0,
+ "waist_cm": 99.0,
+ "sleep_h": 6.5,
+ "training_age_yrs": 1,
  "detrained": true,
  "medically_cleared": true,
  "chest_tissue_unassessed": true,
  "job": "desk",
- "steps": 9000,
- "days": 5,
- "minutes": 60,
+ "steps": 7000,
+ "days": 4,
+ "minutes": 50,
  "gym_traffic": "shared",
  "equipment": [
   "adjustable bench",
@@ -27,16 +27,12 @@
   ""
  ],
  "injuries": [
-  "lumbar disc, currently pain-free"
+  "lumbar disc L4-L5, currently pain-free",
+  "hypertension on amlodipine"
  ],
  "goals": [
   {
-   "want": "size",
-   "of": "calves"
-  },
-  {
-   "want": "size",
-   "of": "chest"
+   "want": "fat_loss"
   },
   {
    "want": "size",
@@ -52,17 +48,6 @@
   "legume"
  ],
  "cooking_fat": "typical_home",
- "eating_occasions": 6,
- "activities": [
-  {
-   "do": "swimming, moderate",
-   "minutes": 30,
-   "times": 2
-  },
-  {
-   "do": "walking, brisk",
-   "minutes": 40,
-   "times": 5
-  }
- ]
+ "eating_occasions": 5,
+ "activities": []
 }

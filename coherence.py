@@ -174,6 +174,83 @@ def session_problems(exercises, lib, equipment, minutes):
 NUTRIENT_CLASSES = ("dairy", "egg", "legume", "nut", "grain")
 
 
+# Protein-bearing tags. A food tagged with one of these and carrying real
+# protein is a protein source, and the person said which sources are allowed.
+PROTEIN_TAGS = ("egg", "dairy", "legume", "nut", "meat", "fish", "soy")
+PROTEIN_G_THRESHOLD = 3.0
+
+
+MIN_TOP_REPS_65 = 6
+
+
+def rep_range_problems(week, age):
+    """From 65, no exercise may be prescribed in a near-maximal rep range.
+
+    Absolute load cannot be checked: the engine never learns a working weight,
+    and asking at intake is a guess from someone who has never lifted. The rep
+    range is the proxy it does hold. A set of 3 is near-maximal whatever is on
+    the bar, and setting every range in the shipped plan to 3-5 changed the
+    audit output by not one line.
+    """
+    if age < 65:
+        return []
+    out = []
+    for day, exs in week.items():
+        for e in exs:
+            top = _top_rep(e.get("reps", ""))
+            if top is not None and top < MIN_TOP_REPS_65:
+                out.append(("refusal", f"{day}, {e['name']}: {e['reps']} is a "
+                                       f"near-maximal range. From 65 the top of "
+                                       f"the range must be at least "
+                                       f"{MIN_TOP_REPS_65} reps."))
+    return out
+
+
+def _top_rep(reps):
+    """The largest plain number in a rep string. None if there is not one."""
+    nums = [int(x) for x in re.findall(r"\d+", str(reps))]
+    return max(nums) if nums else None
+
+
+def source_problems(day, foods, allowed):
+    """A food from a protein source the person ruled out.
+
+    `protein_sources` was a required intake field that no module read. A
+    vegetarian's "no egg" was collected, the audit refused to run without it,
+    and then nothing checked a single food against it. The tags needed to do
+    the check were already on every food.
+    """
+    allowed = set(allowed or ())
+    out = []
+    for slot, items in day.items():
+        for name, _ in items:
+            f = foods[name]
+            if f["per"][1] < PROTEIN_G_THRESHOLD:
+                continue
+            src = [t for t in f.get("tags", []) if t in PROTEIN_TAGS]
+            if src and not (set(src) & allowed):
+                out.append(("refusal", f"{slot}: {name} is {', '.join(src)}, "
+                                       f"which is not in the protein sources "
+                                       f"this person allows "
+                                       f"({', '.join(sorted(allowed)) or 'none given'})."))
+    return out
+
+
+def occasion_problems(day, occasions):
+    """The plan must not ask for more sittings a day than the person will eat.
+
+    `eating_occasions` was the other required field nothing read.
+    `distribution_ok` counts the plan's own slots, so it could never disagree
+    with the plan. This compares the plan to what the person said.
+    """
+    if occasions is None:
+        return []
+    if len(day) > occasions:
+        return [("palatability", f"The day has {len(day)} sittings but the "
+                                 f"person said they will eat {occasions} times.")]
+    return []
+
+
 def clustering_problems(day, foods):
     """One nutrient class bunched into a single sitting instead of spread.
 

@@ -16,10 +16,26 @@ first version of this engine assumed an ambient temperature, assumed how much
 oil goes into home cooking, and assumed what machines a gym had. Two of those
 were wrong in ways that mattered — one of them by 210 calories a day.
 
-Ask in four groups, conversationally, and confirm what you heard back:
+Ask in seven groups, conversationally, and confirm what you heard back:
 
 **The person.** Sex, age, weight in kg, height in cm, waist at the navel in cm,
-typical hours of sleep, years of consistent training.
+typical hours of sleep, years of consistent training, and whether they have had
+a long break or trained on and off (`detrained`). Do not infer the break from
+the training years: someone with ten years behind them and six months off
+answers ten.
+
+**Health.** Any medical conditions and any medications. Put them in `injuries`
+alongside the physical ones — anything the engine does not recognise comes back
+as a referral to a clinician rather than being planned around, which is the
+right outcome. From 65, medical clearance is required and the engine refuses
+without it.
+
+**For women.** Whether they are pregnant, how many weeks since giving birth if
+recent, and their menstrual status: cycling, irregular, absent for three months
+or more, on hormonal contraception, perimenopausal, or postmenopausal. Ask
+plainly. Two refusals in this engine — pregnancy and under twelve weeks
+postpartum — cannot fire for a woman nobody asked, and the status drives what
+the hormone section says and whether the iron flag applies.
 
 **Training.** Days a week they will actually train, minutes per session, how
 busy the gym is (empty, shared, busy), what equipment it actually has, any
@@ -67,6 +83,11 @@ It needs the training week, the eating day, rest-day changes, supplements,
 warm-up, progression rule, proximity to failure, deload rule, bad-day rules and
 a floor day. All of these are data, not prose you write in the handover — the
 renderer reads them.
+
+Two naming conventions the renderer depends on. Name at least one eating slot
+with the words "after training" or "pre-training", or the build fails with a
+missing `peri_workout` section. Include a `day_rest` as well as a `day`, or the
+rest day is audited as if it ate the training-day total.
 
 Draft it roughly. Do not try to get the numbers right by hand; that is what
 step 4 is for.

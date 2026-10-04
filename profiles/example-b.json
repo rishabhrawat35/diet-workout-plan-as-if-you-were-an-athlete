@@ -43,5 +43,9 @@
   "legume"
  ],
  "cooking_fat": "light",
- "eating_occasions": 4
+ "eating_occasions": 4,
+ "pregnant": false,
+ "postpartum_weeks": false,
+ "menstrual_status": "perimenopausal",
+ "activities": []
 }

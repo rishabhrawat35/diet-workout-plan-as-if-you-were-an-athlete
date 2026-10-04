@@ -1,0 +1,22 @@
+{
+ "_note": "A closed library. An activity not listed here is refused, exactly as an exercise the exercise library does not know is refused. The containment on 'the engine could recommend anything in the world' is this file, not the ranking. `met` is the metabolic equivalent used to price the activity in calories; `aerobic` says whether continuous aerobic minutes accumulate, which stop-start sport does not; `aggravates` lists injury-map keys the activity is wrong for; `in_steps` marks an activity the daily step count already prices, so it is not charged twice. MET values follow the Compendium of Physical Activities (Ainsworth et al.).",
+
+ "walking, brisk":        {"met": 4.3, "aerobic": true,  "aggravates": [], "in_steps": true},
+ "walking, hills":        {"met": 6.0, "aerobic": true,  "aggravates": []},
+ "swimming, easy":        {"met": 5.3, "aerobic": true,  "aggravates": []},
+ "swimming, moderate":    {"met": 7.0, "aerobic": true,  "aggravates": ["shoulder impingement"]},
+ "cycling, stationary":   {"met": 6.8, "aerobic": true,  "aggravates": []},
+ "cycling, outdoor":      {"met": 7.5, "aerobic": true,  "aggravates": []},
+ "running, easy":         {"met": 8.3, "aerobic": true,  "aggravates": ["lumbar disc", "knee osteoarthritis"]},
+ "running, hard":         {"met": 9.8, "aerobic": true,  "aggravates": ["lumbar disc", "knee osteoarthritis"]},
+ "rowing machine":        {"met": 7.0, "aerobic": true,  "aggravates": ["lumbar disc"]},
+ "elliptical":            {"met": 5.0, "aerobic": true,  "aggravates": []},
+ "badminton, singles":    {"met": 7.0, "aerobic": false, "aggravates": ["knee osteoarthritis"]},
+ "football, casual":      {"met": 7.0, "aerobic": false, "aggravates": ["lumbar disc", "knee osteoarthritis"]},
+ "cricket":               {"met": 4.8, "aerobic": false, "aggravates": []},
+ "tennis, doubles":       {"met": 6.0, "aerobic": false, "aggravates": ["knee osteoarthritis"]},
+ "yoga":                  {"met": 3.0, "aerobic": false, "aggravates": []},
+ "hiking":                {"met": 6.0, "aerobic": true,  "aggravates": []},
+ "dancing":               {"met": 5.5, "aerobic": false, "aggravates": []},
+ "stair climbing":        {"met": 8.8, "aerobic": true,  "aggravates": ["knee osteoarthritis"]}
+}

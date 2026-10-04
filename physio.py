@@ -33,6 +33,39 @@ REQUIRED = {
     "eating_occasions": "times a day the person will actually eat",
     "job":              "desk, shift, physical or travel",
     "steps":            "typical daily step count",
+    "activities":       "everything other than the gym they can and will do, "
+                        "best first; [] if nothing",
+    # ---- fields that change the programme and used to be optional.
+    # Each of these was read with a silent default. `detrained` absent produced
+    # the same calendar as false, so a deconditioned beginner got the full
+    # programme from week 1 with no warning. `pregnant` and `postpartum_weeks`
+    # absent meant PROCEED, which made two advertised refusals unreachable for
+    # anyone who was never asked. `gym_traffic` absent assumed a shared gym,
+    # which sets seconds per set and therefore whether a session fits.
+    "detrained":        "has the person had a long break, or trained on and off",
+    "gym_traffic":      "empty, shared or busy",
+    "pregnant":         "true or false; never assume false",
+    "menstrual_status": "cycling, irregular, absent_3_months_plus, "
+                        "hormonal_contraception, perimenopausal or postmenopausal",
+    "postpartum_weeks": "weeks since giving birth, or false if not recently",
+}
+
+
+# Profile keys the engine reads on purpose without gating them, each with the
+# reason. The test below fails if a key is read and appears in neither REQUIRED
+# nor here, and fails again if a REQUIRED key is read nowhere. Both halves have
+# fired: `detrained` was read and ungated, so a deconditioned beginner silently
+# got the full programme; `eating_occasions` and `protein_sources` were gated
+# and read by nothing, so a vegetarian's answer was collected and ignored.
+#
+# This mirrors ledger.NARRATED / NOT_DECISIONS, which does the same job for
+# functions. Every other enforcement in this engine fires on something the code
+# can enumerate from itself. Profile keys were the one axis with no such check,
+# which is why they were where the bugs were.
+NOT_GATED = {
+    "name": "a label for the document, not an input to any rule",
+    "medically_cleared": "absent REFUSES at 65 and over, so absence is safe",
+    "chest_tissue_unassessed": "absent omits one referral line and changes no number",
 }
 
 
@@ -40,8 +73,22 @@ class IntakeIncomplete(Exception):
     """Raised, never returned. A gate that only reports is not a gate."""
 
 
+# Required only of female profiles. Asking a man to declare he is not pregnant
+# is noise, and noise in an intake script is how questions stop being asked.
+# Both were previously optional for everyone, which made two refusals the
+# README advertises unreachable for any woman nobody thought to ask.
+FEMALE_ONLY = ("pregnant", "postpartum_weeks", "menstrual_status")
+
+
+def required_for(p):
+    if p.get("sex") == "f":
+        return REQUIRED
+    return {k: v for k, v in REQUIRED.items() if k not in FEMALE_ONLY}
+
+
 def missing_context(p):
-    return [f"{k}: {why}" for k, why in REQUIRED.items() if p.get(k) is None]
+    return [f"{k}: {why}" for k, why in required_for(p).items()
+            if p.get(k) is None]
 
 
 def require_context(p):
@@ -63,7 +110,12 @@ def life_stage_stop(p):
                 "adolescents.")
     if p.get("pregnant"):
         return ("Pregnant. Needs an obstetric clinician, not a generated plan.")
-    if p.get("postpartum_weeks") is not None and p["postpartum_weeks"] < 12:
+    # `false` means "has not recently given birth" and is a real answer. `None`
+    # means nobody asked, and the gate refuses on that before this runs. A
+    # number is weeks. Zero is not "not applicable" -- it is the most
+    # vulnerable week there is, which is why the field needs a non-numeric no.
+    pw = p.get("postpartum_weeks")
+    if pw is not None and pw is not False and pw < 12:
         return ("Under 12 weeks postpartum. Needs pelvic floor and abdominal "
                 "wall assessment before loading.")
     if age >= 65 and not p.get("medically_cleared"):
@@ -89,8 +141,15 @@ def activity_factor(p):
     return round(min(f, 1.95), 3)
 
 
-def tdee(p):
-    return bmr(p) * activity_factor(p)
+def tdee(p, acts=None):
+    """Maintenance calories. Non-gym activity is added, not folded in.
+
+    `acts` is the activity library. It defaults to None so every existing
+    caller keeps working and simply gets no activity contribution, which is
+    what they got before the field existed.
+    """
+    base = bmr(p) * activity_factor(p)
+    return base + (activity_kcal(p, acts) if acts else 0.0)
 
 
 COOKING_FAT_G = {"measured": 5, "light": 8, "typical_home": 12, "heavy": 18}
@@ -205,12 +264,23 @@ def caffeine_cutoff_h_before_bed(p):
 # ==================================================== volume and sessions
 
 def volume_bounds(p):
+    """Weekly sets per muscle: the lower end of the useful range, and the cap.
+
+    The cap used to key on training age alone, so a 68-year-old with one year
+    of training and a 25-year-old with one year got the identical window, and a
+    constructed 68-year-old raised no objection at 20 sets of calves. Recovery
+    capacity falls with age independently of experience, so the cap is trimmed
+    from 50. Moderate evidence: the direction is well supported, the exact step
+    sizes are a judgement.
+    """
     ta = p.get("training_age_yrs", 2)
-    if ta < 1:
-        return 6, 14
-    if ta < 3:
-        return 8, 20
-    return 10, 22
+    lo, hi = (6, 14) if ta < 1 else (8, 20) if ta < 3 else (10, 22)
+    age = p.get("age", 30)
+    if age >= 65:
+        hi = min(hi, 14)
+    elif age >= 50:
+        hi = min(hi, 18)
+    return lo, hi
 
 
 GOAL_WANTS = ("fat_loss", "size", "strength", "endurance")
@@ -224,8 +294,9 @@ GOAL_EFFECT = {
                  "trained at least twice a week",
     "strength":  "the lift is named in the measure table; no set, rep or "
                  "calorie number changes because of it",
-    "endurance": "nothing. This engine plans resistance training only, and "
-                 "checked nothing for endurance",
+    "endurance": "at least 150 minutes a week of continuous aerobic activity, "
+                 "which is a general health minimum and not preparation for any "
+                 "particular event",
 }
 
 
@@ -245,6 +316,36 @@ def check_goals(p):
             raise ValueError(f"a '{w}' goal must name what it is of.")
         if w in ("fat_loss", "endurance") and g.get("of"):
             raise ValueError(f"a '{w}' goal takes no 'of'; got '{g['of']}'.")
+    return True
+
+
+ENUMS = {
+    "job":          ("desk", "shift", "physical", "travel"),
+    "storage":      ("none", "insulated", "insulated_gelpack", "fridge"),
+    "cooking_fat":  ("measured", "light", "typical_home", "heavy"),
+    "gym_traffic":  ("empty", "shared", "busy"),
+    "menstrual_status": ("cycling", "irregular", "absent_3_months_plus",
+                         "hormonal_contraception", "perimenopausal",
+                         "postmenopausal"),
+    "sex":          ("m", "f"),
+}
+
+
+def check_enums(p):
+    """An unrecognised value used to fall through to a default and say nothing.
+
+    `job="nurse"` took the desk multiplier, printed a desk calorie number, and
+    then died with a bare KeyError in the ledger two hundred lines later.
+    `storage="cool box"` silently took the shortest food-safety limit. The
+    pattern for refusing an unknown value already existed in check_goals and
+    check_roles; it was applied to two of five enums.
+    """
+    bad = {k: p[k] for k, allowed in ENUMS.items()
+           if p.get(k) is not None and p[k] not in allowed}
+    if bad:
+        raise ValueError("unrecognised value: " + ", ".join(
+            f"{k}={v!r} (expected one of {', '.join(ENUMS[k])})"
+            for k, v in sorted(bad.items())))
     return True
 
 
@@ -305,28 +406,167 @@ def session_minutes(p, total_sets, paired_sets=0):
 
 # ==================================================== endocrine
 
-def androgen_factors(p, fat_g, kcal):
+def fat_free_mass_kg(p):
+    """Estimated from height and waist, which the engine already holds.
+
+    Relative fat mass: 64 - 20 * height/waist, +12 for women. It carries about
+    5 percentage points of error against a DXA scan, which is why what it feeds
+    is a flag with its number printed, not a refusal.
+    """
+    rfm = 64 - 20 * (p["cm"] / p["waist_cm"]) + (12 if p.get("sex") == "f" else 0)
+    rfm = min(max(rfm, 3.0), 60.0)
+    return round(p["kg"] * (1 - rfm / 100), 1)
+
+
+EA_FLOOR = 30          # kcal per kg of fat-free mass per day
+
+
+def activity_kcal(p, acts):
+    """Calories a day from everything that is not the gym, averaged over a week.
+
+    Priced additively rather than folded into the activity factor's training-day
+    term. That term is a band, not a price -- it credits one gym session with
+    about 740 calories a week, which reproduces the standard multiplier table
+    and bundles general activity level. Adding swims to it over-credits by
+    roughly three times, and a `days` value above 7 makes the weekly average
+    arithmetic weight the rest day negatively.
+
+    `met - 1` removes the resting metabolism already counted in BMR. `in_steps`
+    keeps walking out, because the step count already prices it.
+    """
+    total = 0.0
+    for a in p.get("activities", []) or []:
+        lib = acts[a["do"]]
+        if lib.get("in_steps"):
+            continue
+        total += (lib["met"] - 1) * 3.5 * p["kg"] / 200 * a["minutes"] * a["times"]
+    return round(total / 7, 1)
+
+
+def aerobic_minutes(p, acts):
+    """Weekly minutes of continuous aerobic work. Stop-start sport does not count."""
+    return sum(a["minutes"] * a["times"] for a in p.get("activities", []) or []
+               if acts[a["do"]].get("aerobic"))
+
+
+AEROBIC_FLOOR_MIN = 150     # WHO and ACSM weekly public-health minimum
+
+
+def check_activities(p, acts):
+    """An activity the library does not know is a data error, and raises.
+
+    The library is closed on purpose. Without it the engine could accept any
+    activity anyone names and would then have to price it, which is the
+    "recommend anything in the world" failure. Raising rather than reporting
+    matches check_goals and check_roles: nothing downstream can price an
+    activity it has never heard of, so there is no point continuing.
+    """
+    unknown = [a["do"] for a in p.get("activities", []) or [] if a["do"] not in acts]
+    if unknown:
+        raise ValueError(
+            "not in the activity library: " + ", ".join(sorted(unknown))
+            + ". Add it to data/activities.json with a MET value and what it "
+              "aggravates, or drop it. Nothing can be checked about an activity "
+              "the library does not know.")
+    return True
+
+
+def activity_conflicts(p, acts):
+    """A named activity an injury rules out.
+
+    Reported rather than raised: the activity is real and known, and whether to
+    drop it is a judgement about this plan. It is a refusal severity because
+    doing it is the wrong call, not a slightly worse one.
+    """
+    out = []
+    injuries = [i.lower() for i in p.get("injuries", [])]
+    for a in p.get("activities", []) or []:
+        for bad in acts[a["do"]].get("aggravates", []):
+            if any(bad in i for i in injuries):
+                out.append(("refusal", f"{a['do']} is wrong for '{bad}'. It was "
+                                       f"named as something to do, and it is "
+                                       f"the first thing to drop."))
+    return out
+
+
+def energy_availability(p, intake_kcal):
+    """Intake minus the cost of training, per kg of fat-free mass.
+
+    The engine's only brake on how hard someone diets was 0.75 per cent of
+    bodyweight a week. Across plausible profiles that cap permits a deficit
+    deeper than 25 per cent of maintenance for most people of either sex. What
+    differs by sex is the consequence, not the threshold: menstrual function
+    and bone in women, androgen output in men.
+
+    Returns (kcal per kg FFM, fat-free mass). Both are printed, because the
+    estimate is rough enough that the reader deserves to see it.
+    """
+    ffm = fat_free_mass_kg(p)
+    train_kcal = (p["days"] * p["minutes"] * 5 * 3.5 * p["kg"] / 200) / 7
+    return round((intake_kcal - train_kcal) / ffm, 1), ffm
+
+
+def hormone_factors(p, fat_g, kcal):
+    """What this plan does and does not do to the reader's hormones.
+
+    This was `androgen_factors` and it ran for everyone. A 52-year-old woman
+    received four paragraphs about her own testosterone, including the line
+    about aromatase converting it to estradiol, while the section that should
+    have mentioned her life stage did not exist. The male branch below is
+    unchanged -- it was well tiered and useful. It is now one branch.
+    """
     out = []
     t = tdee(p)
+
+    # ---- true for everyone
     if p.get("sleep_h", 7) < 7:
-        out.append(("strong", f"Sleeping {p['sleep_h']} h. Restricting sleep to "
-                    "about 5 h lowers daytime testosterone by 10 to 15 per cent "
-                    "within a week. Largest modifiable factor here."))
+        out.append(("strong", f"Sleeping {p['sleep_h']} h. Short sleep is the "
+                    "largest modifiable factor in this list, for recovery and "
+                    "for hormonal output in both sexes."))
     if kcal < 0.75 * t:
         out.append(("strong", f"Eating {kcal:.0f} kcal against {t:.0f} kcal is a "
-                    "deficit deeper than 25 per cent, which suppresses androgen "
-                    "output. Raise calories."))
-    if fat_g / p["kg"] < 0.5:
-        out.append(("moderate", f"Fat at {fat_g/p['kg']:.2f} g/kg. Below 0.5 g/kg "
-                    "testosterone falls modestly."))
-    r = p["waist_cm"] / p["cm"]
-    if r >= 0.50:
-        out.append(("strong", f"Waist to height {r:.2f}. Adipose tissue contains "
-                    "aromatase, which converts testosterone to estradiol. Losing "
-                    "the fat is the hormonal intervention."))
-    out.append(("moderate", "Alcohol suppresses testosterone dose-dependently."))
-    out.append(("strong", "Resistance training raises testosterone for under an "
-                "hour after a session. It does not raise resting levels."))
+                    "deficit deeper than 25 per cent. Raise calories."))
+    out.append(("strong", "Resistance training moves hormones for under an hour "
+                "after a session. It does not change resting levels."))
+
+    if p.get("sex") == "f":
+        st = p.get("menstrual_status")
+        if st in ("cycling", "irregular", "absent_3_months_plus"):
+            out.append(("strong", "Energy availability is the variable that "
+                        "matters most here. Eating too little for too long "
+                        "disturbs the menstrual cycle and suppresses bone "
+                        "formation, and it does so before bodyweight shows it."))
+        if st == "absent_3_months_plus":
+            out.append(("strong", "Periods absent for three months or more. "
+                        "This needs a clinician before any deficit continues."))
+        elif st == "irregular":
+            out.append(("moderate", "Irregular periods while in a deficit are "
+                        "worth raising with a clinician rather than waiting."))
+        if st == "perimenopausal":
+            out.append(("strong", "Cycle length and sleep both vary through "
+                        "perimenopause. The deload spacing in this plan is "
+                        "already shortened by your age and your sleep."))
+        if st == "postmenopausal":
+            out.append(("moderate", "Bone is the live issue after menopause. "
+                        "Progressive loading of the hips and spine is part of "
+                        "why this plan is built around compound lifts."))
+            out.append(("strong", "Calcium and vitamin D intake matter more "
+                        "than any training variable for bone here."))
+        out.append(("strong", "This plan makes no claim about raising or "
+                    "lowering estradiol or progesterone. Nothing in it is "
+                    "timed to a cycle phase."))
+    else:
+        if fat_g / p["kg"] < 0.5:
+            out.append(("moderate", f"Fat at {fat_g/p['kg']:.2f} g/kg. Below "
+                        "0.5 g/kg testosterone falls modestly."))
+        r = p["waist_cm"] / p["cm"]
+        if r >= 0.50:
+            out.append(("strong", f"Waist to height {r:.2f}. Adipose tissue "
+                        "contains aromatase, which converts testosterone to "
+                        "estradiol. Losing the fat is the hormonal "
+                        "intervention."))
+        out.append(("moderate", "Alcohol suppresses testosterone "
+                    "dose-dependently."))
     return out
 
 
@@ -400,6 +640,11 @@ INJURY_MAP = {
         ("straight-bar curl", "forced wrist supination under load"),
         ("front squat", "extreme wrist extension in the rack position"),
     ],
+    "pelvic floor": [
+        ("valsalva", "raises intra-abdominal pressure against the pelvic floor"),
+        ("heavy deadlift", "loads the pelvic floor under maximal bracing"),
+        ("high impact jumping", "repeated downward loading of the pelvic floor"),
+    ],
     "hernia": [
         ("valsalva", "intra-abdominal pressure"),
         ("heavy deadlift", "intra-abdominal pressure"),
@@ -438,7 +683,7 @@ PATTERN_RISK = [
     ("Iron, the kind from meat", {"meat", "fish"},
      "No heme iron here. Plant iron absorbs better alongside vitamin C and "
      "worse alongside a large dose of calcium in the same meal."),
-    ("Calcium", {"dairy", "fortified", "leafy_greens"},
+    ("Calcium", {"dairy", "fortified"},
      "No substantial calcium source in this pattern."),
 ]
 

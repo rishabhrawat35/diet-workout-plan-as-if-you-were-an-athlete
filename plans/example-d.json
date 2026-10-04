@@ -1,0 +1,329 @@
+{
+ "week": {
+  "D1 Full body, machines": [
+   {
+    "name": "leg press",
+    "muscle": "quads",
+    "sets": 3,
+    "reps": "10-15",
+    "also": [
+     "glutes"
+    ]
+   },
+   {
+    "name": "seated calf raise",
+    "muscle": "calves",
+    "sets": 2,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "incline machine press",
+    "muscle": "chest",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "delts",
+     "triceps"
+    ]
+   },
+   {
+    "name": "lateral raise",
+    "muscle": "delts",
+    "sets": 2,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "lat pulldown",
+    "muscle": "back",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "dead bug",
+    "muscle": "core",
+    "sets": 2,
+    "reps": "8 each side",
+    "also": []
+   }
+  ],
+  "D2 Full body, hips and pull": [
+   {
+    "name": "hip thrust",
+    "muscle": "glutes",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "hamstrings"
+    ]
+   },
+   {
+    "name": "seated leg curl",
+    "muscle": "hamstrings",
+    "sets": 3,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "cable row",
+    "muscle": "back",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "face pull",
+    "muscle": "delts",
+    "sets": 2,
+    "reps": "15-20",
+    "also": []
+   },
+   {
+    "name": "90/90 hip switch",
+    "muscle": "core",
+    "sets": 2,
+    "reps": "10 each side",
+    "also": []
+   }
+  ],
+  "D3 Full body, repeat and balance": [
+   {
+    "name": "leg press",
+    "muscle": "quads",
+    "sets": 3,
+    "reps": "10-15",
+    "also": [
+     "glutes"
+    ]
+   },
+   {
+    "name": "standing calf raise",
+    "muscle": "calves",
+    "sets": 2,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "chest supported row",
+    "muscle": "back",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "biceps"
+    ]
+   },
+   {
+    "name": "lateral raise",
+    "muscle": "delts",
+    "sets": 2,
+    "reps": "12-15",
+    "also": []
+   },
+   {
+    "name": "incline dumbbell press 30 deg",
+    "muscle": "chest",
+    "sets": 3,
+    "reps": "10-12",
+    "also": [
+     "delts",
+     "triceps"
+    ]
+   },
+   {
+    "name": "dead bug",
+    "muscle": "core",
+    "sets": 2,
+    "reps": "8 each side",
+    "also": []
+   }
+  ]
+ },
+ "day": {
+  "08:00 breakfast, home": [
+   [
+    "egg bhurji",
+    1
+   ],
+   [
+    "curd",
+    1
+   ],
+   [
+    "roti",
+    1
+   ]
+  ],
+  "13:00 lunch, home": [
+   [
+    "dal",
+    1
+   ],
+   [
+    "high-protein milk",
+    250
+   ],
+   [
+    "egg white",
+    4
+   ],
+   [
+    "salad",
+    1
+   ],
+   [
+    "orange",
+    1
+   ]
+  ],
+  "16:30 after training": [
+   [
+    "dry fruits",
+    10
+   ]
+  ],
+  "20:00 dinner, home": [
+   [
+    "whey in water",
+    1
+   ],
+   [
+    "paneer",
+    40
+   ],
+   [
+    "sabji",
+    1
+   ],
+   [
+    "egg white",
+    4
+   ]
+  ]
+ },
+ "day_rest": {
+  "08:00 breakfast, home": [
+   [
+    "egg bhurji",
+    1
+   ],
+   [
+    "curd",
+    1
+   ],
+   [
+    "roti",
+    1
+   ]
+  ],
+  "13:00 lunch, home": [
+   [
+    "dal",
+    1
+   ],
+   [
+    "high-protein milk",
+    250
+   ],
+   [
+    "egg white",
+    4
+   ],
+   [
+    "salad",
+    1
+   ],
+   [
+    "orange",
+    1
+   ]
+  ],
+  "16:30 after training": [
+   [
+    "dry fruits",
+    10
+   ],
+   [
+    "banana",
+    1
+   ]
+  ],
+  "20:00 dinner, home": [
+   [
+    "whey in water",
+    1
+   ],
+   [
+    "paneer",
+    40
+   ],
+   [
+    "sabji",
+    1
+   ],
+   [
+    "egg white",
+    4
+   ]
+  ]
+ },
+ "supplements": [
+  {
+   "item": "Creatine monohydrate",
+   "dose": "5 g",
+   "when": "With breakfast, every day including rest days"
+  },
+  {
+   "item": "Whey protein",
+   "dose": "1 scoop",
+   "when": "Straight after training"
+  },
+  {
+   "item": "Fish oil",
+   "dose": "1 to 2 g combined EPA and DHA",
+   "when": "With dinner"
+  },
+  {
+   "item": "Vitamin D",
+   "dose": "Dose to your blood test result",
+   "when": "With dinner"
+  }
+ ],
+ "floor_day": [
+  [
+   "high-protein milk",
+   500
+  ],
+  [
+   "whey in water",
+   1
+  ],
+  [
+   "boiled egg",
+   4
+  ],
+  [
+   "egg white",
+   6
+  ],
+  [
+   "roti",
+   2
+  ]
+ ],
+ "warmup": "Warm up: 5 minutes on a bike or brisk walking, then 2 sets of the first exercise at half the working weight for 8 reps, then 1 set at 75 percent of the working weight for 3 reps.",
+ "progression": "Add weight when you hit the top of the rep range on every set of an exercise for two sessions in a row. Add the smallest increment the equipment allows.",
+ "proximity": "Take every set to 1 or 2 reps short of the point where form breaks. Do not train to failure on the first exercise of any day.",
+ "deload_rule": "In a deload week do every exercise listed, at half the sets, at the same weight.",
+ "bad_day": [
+  "Short on time: do the first three exercises at full sets and stop.",
+  "Equipment occupied: do the next exercise on the list and come back.",
+  "Missed a day: do it the next day. Do not merge two sessions into one.",
+  "Missed a week: restart at the last deload week, not where you left off."
+ ]
+}

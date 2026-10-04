@@ -1,20 +1,19 @@
 {
- "name": "Example A \u2014 30, returning after a back injury",
- "sex": "m",
- "age": 30,
- "kg": 80.0,
- "cm": 178.0,
- "waist_cm": 95.0,
+ "name": "Example D \u2014 72, woman, first time in a gym",
+ "sex": "f",
+ "age": 72,
+ "kg": 58.0,
+ "cm": 155.0,
+ "waist_cm": 88.0,
  "sleep_h": 7.0,
- "training_age_yrs": 5,
+ "training_age_yrs": 0,
  "detrained": true,
  "medically_cleared": true,
- "chest_tissue_unassessed": true,
  "job": "desk",
- "steps": 9000,
- "days": 5,
- "minutes": 60,
- "gym_traffic": "shared",
+ "steps": 5000,
+ "days": 3,
+ "minutes": 45,
+ "gym_traffic": "empty",
  "equipment": [
   "adjustable bench",
   "chest press machine",
@@ -27,20 +26,12 @@
   ""
  ],
  "injuries": [
-  "lumbar disc, currently pain-free"
+  "knee osteoarthritis"
  ],
  "goals": [
   {
-   "want": "size",
-   "of": "calves"
-  },
-  {
-   "want": "size",
-   "of": "chest"
-  },
-  {
-   "want": "size",
-   "of": "glutes"
+   "want": "strength",
+   "of": "leg press"
   }
  ],
  "ambient_c": 23,
@@ -52,17 +43,20 @@
   "legume"
  ],
  "cooking_fat": "typical_home",
- "eating_occasions": 6,
+ "eating_occasions": 4,
+ "pregnant": false,
+ "postpartum_weeks": false,
+ "menstrual_status": "postmenopausal",
  "activities": [
   {
-   "do": "swimming, moderate",
+   "do": "walking, hills",
    "minutes": 30,
-   "times": 2
+   "times": 3
   },
   {
-   "do": "walking, brisk",
+   "do": "yoga",
    "minutes": 40,
-   "times": 5
+   "times": 2
   }
  ]
 }

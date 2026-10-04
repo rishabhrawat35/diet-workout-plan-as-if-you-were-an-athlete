@@ -64,8 +64,9 @@ def rest_day_diff(plan, foods):
     return out or ["Nothing changes."]
 
 
-def render(p, plan, foods, lib):
-    v, s = run(p, plan, foods, lib)
+def render(p, plan, foods, lib, ACTS=None):
+    ACTS = ACTS or {}
+    v, s = run(p, plan, foods, lib, ACTS)
     L, emitted = [], set()
     w = L.append
 
@@ -127,6 +128,9 @@ def render(p, plan, foods, lib):
     w("|---|---|")
     for slot, items in plan["day"].items():
         w(f"| {slot} | " + ", ".join(units.amount(n, q, foods[n]) for n, q in items) + " |")
+        # A naming convention the plan author has to know about, so it is
+        # stated in SKILL.md step 3 rather than only living here. A plan whose
+        # slots are named differently fails the contract with no hint why.
         if "after training" in slot or "pre-training" in slot:
             mark("peri_workout")
     w("")
@@ -200,6 +204,50 @@ def render(p, plan, foods, lib):
               f"a month of real change.")
     w("")
 
+    mark("activity")
+    w("## Outside the gym")
+    w("")
+    acts = p.get("activities") or []
+    if not acts:
+        w("You named nothing you do outside the gym. The calorie target is "
+          "built from your step count and your job alone, so anything you add "
+          "makes the deficit larger than this plan says.")
+    else:
+        w("In your order. The first is the one to protect; the last is the "
+          "first to drop if the week will not hold.")
+        w("")
+        w("| Order | Activity | Each session | Times a week | Calories a day |")
+        w("|---|---|---|---|---|")
+        for i, a in enumerate(acts, 1):
+            lib = ACTS.get(a["do"], {})
+            one = {"activities": [a], "kg": p["kg"]}
+            if lib.get("in_steps"):
+                cost = "already counted in your step total"
+            else:
+                kc = physio.activity_kcal(one, ACTS) if ACTS else 0
+                cost = f"{kc:.0f}"
+            w(f"| {i} | {a['do']} | {a['minutes']} minutes | {a['times']} | "
+              f"{cost} |")
+        w("")
+        mins = physio.aerobic_minutes(p, ACTS) if ACTS else 0
+        w(f"Continuous aerobic minutes a week: {mins}. Stop-start sport is not "
+          f"counted towards that number.")
+    w("")
+
+    mark("rest_day")
+    w("## On a day with no gym session")
+    w("")
+    for line in plan.get("rest_day", [
+            "Walk. The step count in your calorie target assumes you keep "
+            "moving on these days.",
+            "Do not add a gym session to make up for a missed one."]):
+        w(f"- {line}")
+    w("")
+    w("These are instructions, not constraints the audit can check. Nothing "
+      "here is rejected for a walk not taken, and the calorie target already "
+      "assumes the steps you gave.")
+    w("")
+
     mark("measurement")
     w("## Measure")
     w("")
@@ -244,7 +292,11 @@ def render(p, plan, foods, lib):
     for x in ledger.build(p, plan, tk, s["weekly"], s["in_deficit"], v):
         if x.area == "Injuries":
             mark("contraindicated")
-        if "androgen" in x.rejected:
+        if x.area == "Energy":
+            # This used to key on the literal string "androgen" appearing in a
+            # ledger entry, so rewording the hormone section broke the build.
+            # The section it guards is the downside of the energy decision, so
+            # it keys on the area that decision belongs to.
             mark("downside")
         if x.area == "Protein" and "sitting" in x.chose:
             mark("distribution")
@@ -332,7 +384,7 @@ def render(p, plan, foods, lib):
 
     w("## Hormones")
     w("")
-    for c, m in physio.androgen_factors(p, s["fat"], s["kcal"]):
+    for c, m in physio.hormone_factors(p, s["fat"], s["kcal"]):
         w(f"- [{c}] {m}")
     w("")
 
@@ -380,11 +432,13 @@ if __name__ == "__main__":
     ap.add_argument("--plan", required=True)
     ap.add_argument("--foods", default="data/foods-india-egg-dairy.json")
     ap.add_argument("--exercises", default="data/exercises-home-gym.json")
+    ap.add_argument("--activities", default="data/activities.json")
     ap.add_argument("--out", required=True)
     a = ap.parse_args()
     p, plan = load(a.profile), load(a.plan)
     foods = {k: x for k, x in load(a.foods).items() if k[0] != "_"}
     lib = {k: x for k, x in load(a.exercises).items() if k[0] != "_"}
+    acts = {k: x for k, x in load(a.activities).items() if k[0] != "_"}
     with open(a.out, "w") as f:
-        f.write(render(p, plan, foods, lib))
+        f.write(render(p, plan, foods, lib, acts))
     print(f"written to {a.out}")

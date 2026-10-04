@@ -45,7 +45,9 @@ class Entry:
 # Functions that decide nothing: they gate, or they read a field back out.
 # A rule that picks a number must be narrated; these pick none.
 NOT_DECISIONS = {"missing_context", "require_context",
-                 "check_goals", "size_goals", "strength_goals"}
+                 "check_goals", "check_enums", "check_activities",
+                 "activity_conflicts", "required_for",
+                 "size_goals", "strength_goals"}
 
 NARRATED = {
     "bmr", "activity_factor", "tdee", "cooking_fat_g",
@@ -55,7 +57,9 @@ NARRATED = {
     "volume_bounds", "priority_min_sets", "sec_per_set", "session_minutes",
     "banned_movements", "waist_height_flag", "healthy_bodyfat_range",
     "carried_hold_limit_h", "chilled",
-    "life_stage_stop", "micronutrient_flags", "androgen_factors",
+    "life_stage_stop", "micronutrient_flags", "hormone_factors",
+    "energy_availability", "fat_free_mass_kg", "activity_kcal",
+    "aerobic_minutes",
     "unmapped_injuries", "refer_out", "distribution_ok",
 }
 
@@ -146,18 +150,24 @@ def build(p, plan, day_kcal, weekly_kcal, deficit, violations=()):
 
     # ---------------------------------------------------------------- volume
     lo, hi = physio.volume_bounds(p)
-    add("Volume", f"{lo} to {hi} sets per muscle per week",
+    add("Volume", f"No muscle above {hi} sets a week",
         f"From {p.get('training_age_yrs')} years of consistent training. "
-        f"Beginners grow on less and tolerate less.",
-        "", "physio.volume_bounds")
+        f"Beginners grow on less and tolerate less. The {lo} set figure is the "
+        f"lower end of the useful range, not a requirement: a muscle worked "
+        f"indirectly by other lifts can sit below it.",
+        "Not a floor on every muscle. Enforcing one would add sets to triceps "
+        "and calves purely to reach a number, and this plan gives triceps 5.5 "
+        "direct sets on purpose.",
+        "physio.volume_bounds")
 
     if physio.size_goals(p):
         add("Volume", f"At least {physio.priority_min_sets(p)} sets for "
                       f"{', '.join(physio.size_goals(p))}",
-            f"You set a size goal on them, so they carry a floor "
-            f"{physio.priority_min_sets(p) - lo} sets above the general minimum.",
-            "Not the general floor. A muscle named as a priority and trained at "
-            "the general minimum was a priority in the intent only.",
+            f"You set a size goal on them. This is the one set floor the "
+            f"engine enforces, and it is {physio.priority_min_sets(p) - lo} "
+            f"sets above the lower end of the general range.",
+            "A muscle named as a goal and trained at the bottom of the range "
+            "was a goal in the intent only.",
             "physio.priority_min_sets")
 
     add("Sessions", f"A set costs {physio.sec_per_set(p)} seconds",
@@ -174,6 +184,15 @@ def build(p, plan, day_kcal, weekly_kcal, deficit, violations=()):
             "; ".join(f"no {m}, which {why}" for m, why in banned[:3])
             + (f"; and {len(banned) - 3} more" if len(banned) > 3 else "") + ".",
             "Not listed as cautions. A caution in a document is not a decision.",
+            "physio.banned_movements")
+    if not banned and not physio.unmapped_injuries(p):
+        # Without this entry the contract has no `contraindicated` mark, and a
+        # person who reported no injuries could not get a document at all --
+        # audit passed with zero violations and render raised Incomplete. Every
+        # shipped profile had an injury, so no test saw it.
+        add("Injuries", "Nothing was excluded",
+            "You reported no injuries, so no movement was removed from the plan.",
+            "Not silence. A plan that excluded nothing should say so.",
             "physio.banned_movements")
     for inj in physio.unmapped_injuries(p):
         add("Injuries", f"'{inj}' was not planned around",
@@ -200,6 +219,16 @@ def build(p, plan, day_kcal, weekly_kcal, deficit, violations=()):
         "These are read out of the plan. The previous version named two fixed "
         "lifts, which was a claim about a plan the engine had not looked at.",
         "physio.tracked_lifts")
+
+    ea, ffm = physio.energy_availability(p, weekly_kcal)
+    add("Energy availability", f"{ea} kcal per kg of fat-free mass a day",
+        f"Intake less the cost of training, over an estimated {ffm} kg of "
+        f"fat-free mass. Under {physio.EA_FLOOR} is where menstrual function "
+        f"and bone formation are affected in women and androgen output in men.",
+        "The fat-free mass figure comes from height and waist and carries "
+        "about 5 percentage points of error, so this is a flag with its "
+        "working shown, not a refusal.",
+        "physio.energy_availability, physio.fat_free_mass_kg")
 
     # ---------------------------------------------------------- body and sex
     r, flag = physio.waist_height_flag(p)

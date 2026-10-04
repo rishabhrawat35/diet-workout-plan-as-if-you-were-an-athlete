@@ -16,11 +16,13 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 def person(**kw):
     d = dict(sex="m", age=30, kg=80.0, cm=178.0, waist_cm=95.0, sleep_h=7.0,
              training_age_yrs=5, medically_cleared=True,
-             job="desk", steps=9000, days=5, minutes=60, gym_traffic="shared",
+             detrained=False, gym_traffic="shared", pregnant=False,
+             postpartum_weeks=False, menstrual_status="cycling",
+             job="desk", steps=9000, days=5, minutes=60,
              equipment=["cable stack"], injuries=[], goals=[{"want": "size", "of": "calves"}],
              ambient_c=23, storage="insulated_gelpack", hold_hours=6,
              protein_sources=["egg"], cooking_fat="typical_home",
-             eating_occasions=6)
+             eating_occasions=6, activities=[])
     d.update(kw); return d
 
 
@@ -29,10 +31,55 @@ class IntakeGate(unittest.TestCase):
         self.assertTrue(P.require_context(person()))
 
     def test_every_required_field_is_load_bearing(self):
-        for f in P.REQUIRED:
-            d = person(); d[f] = None
-            with self.assertRaises(P.IntakeIncomplete, msg=f"{f} not enforced"):
-                P.require_context(d)
+        """Two of these are asked only of women, so the fixture is run as both."""
+        for sex in ("m", "f"):
+            for f in P.required_for(person(sex=sex)):
+                d = person(sex=sex); d[f] = None
+                with self.assertRaises(P.IntakeIncomplete,
+                                       msg=f"{f} not enforced for sex={sex}"):
+                    P.require_context(d)
+
+    def test_required_and_the_keys_the_code_reads_agree(self):
+        """The one axis that had no coverage, which is where the bugs were.
+
+        Every other enforcement mechanism in this engine fires on something the
+        code can enumerate from itself: ledger.NARRATED enumerates functions,
+        test_severity enumerates severity strings, contract.ALL enumerates
+        document sections. REQUIRED was a hand-maintained list calibrated
+        against the intake script rather than against what the modules read.
+
+        Both halves of this test have a real defect behind them. `detrained`
+        was read and not gated, so omitting it silently removed the four-week
+        ramp. `eating_occasions` and `protein_sources` were gated and read
+        nowhere, so the intake refused to run without an answer it then threw
+        away.
+        """
+        import re
+        mods = ("physio.py", "audit.py", "coherence.py", "blocks.py",
+                "render.py", "ledger.py", "myths.py", "units.py")
+        pat = re.compile(r"""p(?:rof)?\s*(?:\[\s*["'](\w+)["']\s*\]"""
+                         r"""|\.get\(\s*["'](\w+)["'])""")
+        read = set()
+        for m in mods:
+            with open(os.path.join(HERE, m)) as fh:
+                for a, b in pat.findall(fh.read()):
+                    read.add(a or b)
+
+        known = set(P.REQUIRED) | set(P.NOT_GATED)
+        ungated = sorted(read - known)
+        self.assertEqual(ungated, [], "profile keys read but neither required "
+                                      "nor listed in physio.NOT_GATED with a "
+                                      "reason: " + ", ".join(ungated))
+
+        unread = sorted(set(P.REQUIRED) - read)
+        self.assertEqual(unread, [], "required fields that no module reads, so "
+                                     "the intake refuses to run without an "
+                                     "answer it then ignores: "
+                                     + ", ".join(unread))
+
+    def test_a_man_is_not_asked_whether_he_is_pregnant(self):
+        self.assertNotIn("pregnant", P.required_for(person(sex="m")))
+        self.assertIn("pregnant", P.required_for(person(sex="f")))
 
     def test_the_gate_raises_it_does_not_report(self):
         d = person(); d["equipment"] = None

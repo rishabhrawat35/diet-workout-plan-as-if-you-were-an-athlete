@@ -32,7 +32,7 @@ def printed_totals(items, foods):
     return units.printed_totals(items, foods)[:4]
 
 
-def run(p, plan, foods, lib):
+def run(p, plan, foods, lib, acts=None):
     v = []
 
     stop = physio.life_stage_stop(p)
@@ -43,6 +43,10 @@ def run(p, plan, foods, lib):
     coherence.check_roles(foods)
     coherence.check_composition(foods)
     physio.check_goals(p)
+    physio.check_enums(p)
+    if acts:
+        physio.check_activities(p, acts)
+        v += physio.activity_conflicts(p, acts)
 
     # ---- training volume
     sets, freq = {}, {}
@@ -57,6 +61,19 @@ def run(p, plan, foods, lib):
                 sets[s2] = sets.get(s2, 0) + n * 0.5
                 if s2 not in seen:
                     freq[s2] = freq.get(s2, 0) + 1; seen.add(s2)
+    # The volume checks read plan["week"]; the calorie arithmetic reads
+    # p["days"]. They were never compared, so a five-day plan audited at days=2
+    # passed with zero violations while TDEE moved by 531 calories. Above 7 the
+    # weekly average weights the rest day negatively and comes out above the
+    # training-day total.
+    if not 1 <= p["days"] <= 7:
+        v.append(("refusal", f"days is {p['days']}; a week has 7."))
+    elif len(plan["week"]) != p["days"]:
+        v.append(("floor", f"The plan has {len(plan['week'])} training days but "
+                           f"the profile says {p['days']} a week. The volume "
+                           f"checks read the plan; the calorie target reads the "
+                           f"profile."))
+    v += coherence.rep_range_problems(plan["week"], p["age"])
     lo, hi = physio.volume_bounds(p)
     pmin = physio.priority_min_sets(p)
     goals = physio.size_goals(p)
@@ -128,7 +145,7 @@ def run(p, plan, foods, lib):
     # and the arithmetic could disagree and nothing objected: example-b declared
     # a deficit while its plan fed a 498 calorie surplus, and drew the deficit
     # protein floor anyway.
-    t_ = physio.tdee(p)
+    t_ = physio.tdee(p, acts)
     day_totals = {}
     protein_per_sitting = {}
     for label, dd in days.items():
@@ -147,6 +164,10 @@ def run(p, plan, foods, lib):
                                     f"total says {t[0]:.0f} / {t[1]:.1f}."))
         day_totals[label] = tot
         protein_per_sitting[label] = per
+        for sev, msg in coherence.source_problems(dd, foods, p["protein_sources"]):
+            v.append((sev, f"{label}, {msg}"))
+        for sev, msg in coherence.occasion_problems(dd, p["eating_occasions"]):
+            v.append((sev, f"{label}: {msg}"))
 
     in_deficit = physio.in_deficit(p, day_totals, t_)
     pf, pt = physio.protein_target_g(p, in_deficit)
@@ -175,6 +196,18 @@ def run(p, plan, foods, lib):
     rs = day_totals.get("rest day", [tr])[0]
     n_train = p["days"]
     weekly = (tr * n_train + rs * (7 - n_train)) / 7
+    if acts and any(g["want"] == "endurance" for g in p.get("goals", [])):
+        mins = physio.aerobic_minutes(p, acts)
+        if mins < physio.AEROBIC_FLOOR_MIN:
+            v.append(("floor", f"An endurance goal with {mins} aerobic minutes "
+                               f"a week, under the {physio.AEROBIC_FLOOR_MIN} "
+                               f"minute public-health minimum."))
+    ea, ffm = physio.energy_availability(p, weekly)
+    if ea < physio.EA_FLOOR:
+        v.append(("floor", f"Energy availability {ea} kcal per kg of fat-free "
+                           f"mass a day, under the {physio.EA_FLOOR} floor "
+                           f"(fat-free mass estimated at {ffm} kg). Raise "
+                           f"calories or train less."))
     wk = (t_ - weekly) * 7 / 7700
     if wk > physio.max_weekly_loss_kg(p):
         v.append(("floor", f"Losing {wk:.2f} kg/week on the weekly average exceeds "
@@ -224,13 +257,15 @@ def main():
     ap.add_argument("--plan", required=True)
     ap.add_argument("--foods", default="data/foods-india-egg-dairy.json")
     ap.add_argument("--exercises", default="data/exercises-home-gym.json")
+    ap.add_argument("--activities", default="data/activities.json")
     a = ap.parse_args()
 
     p, plan = load(a.profile), load(a.plan)
     foods = {k: val for k, val in load(a.foods).items() if not k.startswith("_")}
     lib = {k: val for k, val in load(a.exercises).items() if not k.startswith("_")}
+    acts = {k: val for k, val in load(a.activities).items() if not k.startswith("_")}
 
-    v, s = run(p, plan, foods, lib)
+    v, s = run(p, plan, foods, lib, acts)
     print(f"AUDIT -- {p['name']}\n")
     print(f"  TDEE {s['tdee']:.0f}   weekly average intake {s['weekly']:.0f}   "
           f"loss {s['loss']:.2f} kg/wk (cap {physio.max_weekly_loss_kg(p)})")

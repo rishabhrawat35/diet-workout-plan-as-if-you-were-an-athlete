@@ -80,12 +80,34 @@ BLOCK_INSTRUCTION = {
 }
 
 
+def break_kcal(base_kcal, tdee_kcal):
+    """A diet break must feed MORE than the weeks it is a break from.
+
+    This returned TDEE unconditionally. For anyone whose TDEE sits below the
+    plan's calories -- the normal case for a smaller body handed a plan drafted
+    for a bigger one -- the week labelled "eat at TDEE through the break" was
+    the hungriest week of the programme. A 58 kg 72-year-old on a plan drafted
+    at 2323 got 1444 in her break week and 2323 in every build week.
+    """
+    return round(max(base_kcal, tdee_kcal))
+
+
 def kcal_for_block(kind, diet_break, base_kcal, tdee_kcal):
     if diet_break:
-        return round(tdee_kcal), "maintenance: eat at TDEE through the break"
+        k = break_kcal(base_kcal, tdee_kcal)
+        why = ("maintenance: eat at TDEE through the break"
+               if k > round(base_kcal) else
+               "the plan already feeds at or above maintenance, so this week "
+               "holds calories rather than raising them")
+        return k, why
     if kind == "deload":
-        return round(tdee_kcal - (tdee_kcal - base_kcal) * 0.5), \
-               "half the usual deficit: training output is down, recovery is the point"
+        # max() for the same reason break_kcal needs it: when the plan already
+        # feeds at or above maintenance there is no deficit to halve, and
+        # halving it arithmetically made the recovery week the hungriest week.
+        k = round(max(base_kcal, tdee_kcal - (tdee_kcal - base_kcal) * 0.5))
+        return k, ("half the usual deficit: training output is down, recovery "
+                   "is the point" if k > round(base_kcal) else
+                   "calories held: there is no deficit to ease here")
     if kind == "reintroduction":
         return round(base_kcal), "full target: the deficit starts on day one"
     return round(base_kcal), "full target"

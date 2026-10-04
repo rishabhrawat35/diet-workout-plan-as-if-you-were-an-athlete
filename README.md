@@ -74,7 +74,7 @@ Nineteen things about you change the numbers:
 | Exercises removed for injury | 7 | 3 |
 | How long one set takes | 200 seconds | 240 seconds |
 
-Same code. No branches for "man" or "woman". Every number comes out of the answers.
+Same code. The hormone section, the referrals and the micronutrient flags branch on sex and life stage. Every calorie and set number comes out of the answers.
 
 ---
 
@@ -357,7 +357,7 @@ Early versions only asked *is this number allowed*. None asked *is this section 
 ## 🧪 Tests
 
 ```bash
-python3 -m unittest discover -p 'test_*.py'   # 90 tests
+python3 -m unittest discover -p 'test_*.py'   # 95 tests
 ```
 
 Most exist because something was already broken when it shipped.
