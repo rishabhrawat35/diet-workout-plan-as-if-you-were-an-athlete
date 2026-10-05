@@ -22,6 +22,8 @@ Runs on your laptop. No account, no subscription, no internet needed.
 - Supplements, doses, and what time of day
 - All 24 weeks, and what changes in each block
 - What to measure, how often, and what to do when the number moves
+- What you can do outside the gym, in your order, and what each adds
+- What to do on a day with no gym session
 
 **Pages 3 and 4 — why.** For when you want to check something.
 
@@ -36,7 +38,8 @@ There is nothing else. No app to open, no streak to maintain, no notifications.
 
 ## 🎯 It is built around you, not a template
 
-Nineteen things about you change the numbers:
+Twenty-six things about you change the numbers. Three of them are asked only
+of women:
 
 | About you | What it changes |
 |---|---|
@@ -51,7 +54,12 @@ Nineteen things about you change the numbers:
 | How busy your gym is | How long one set really takes |
 | What machines you have | Which exercises are possible at all |
 | Injuries | Which movements are removed, and why |
-| Muscles you care about | The minimum sets those get |
+| What you are training for | Size, strength, fat loss or endurance — each changes a different rule |
+| Whether you have had a long break | Whether the first four weeks are a ramp |
+| What you can do outside the gym | Your calorie burn, and what the plan tells you to protect first |
+| Pregnancy and weeks since birth | Whether a plan is written at all |
+| Menstrual status | The hormone section, the iron flag, and when to refer you to a clinician |
+| How many times a day you eat | How many sittings the plan is allowed to ask for |
 | Your job | Your calorie burn |
 | Daily step count | Your calorie burn |
 | Temperature where you keep lunch | What you can safely carry |
@@ -100,7 +108,8 @@ Claude reads skills from a folder called `.claude/skills` in your home directory
 
 ```bash
 mkdir -p ~/.claude/skills
-mv diet-workout-plan-as-if-you-were-an-athlete ~/.claude/skills/trainer
+mv diet-workout-plan-as-if-you-were-an-athlete \
+   ~/.claude/skills/training-and-eating-plan
 ```
 
 **Mac, without Terminal:**
@@ -108,13 +117,14 @@ mv diet-workout-plan-as-if-you-were-an-athlete ~/.claude/skills/trainer
 2. Press **Cmd + Shift + G**
 3. Type `~/.claude/skills` and press Enter. If it says the folder does not exist, create a folder called `.claude` in your home folder, and a folder called `skills` inside that.
 4. Drag the unzipped folder in
-5. Rename it to `trainer`
+5. Rename it to `training-and-eating-plan` — this must match exactly, because it is
+   the name declared inside `SKILL.md`, and a folder named anything else will not load
 
-**Windows:** the folder is `C:\Users\<your name>\.claude\skills\trainer`
+**Windows:** the folder is `C:\Users\<your name>\.claude\skills\training-and-eating-plan`
 
 ### Step 3 — check Claude can see it
 
-Open Claude and type `/` — `trainer` should appear in the list. If it does not, close Claude completely and reopen it.
+Open Claude and type `/` — `training-and-eating-plan` should appear in the list. If it does not, close Claude completely and reopen it.
 
 ### Step 4 — ask for a plan
 
@@ -124,7 +134,7 @@ Open Claude and type `/` — `trainer` should appear in the list. If it does not
 
 ### Step 5 — answer the questions
 
-Claude asks 20 things: your measurements, your gym, your injuries, what you eat, where you keep lunch.
+Claude asks 26 things: your measurements, your gym, your injuries, what you can do outside the gym, what you eat, where you keep lunch, and any conditions or medications. Women are also asked about pregnancy and menstrual status, because two of the refusals cannot fire for someone nobody asked.
 
 **Answer honestly rather than aspirationally.** If you will realistically train 4 days, say 4, not 6. Every answer changes the numbers, and "whatever you think" gets you the generic plan you were trying to avoid.
 
@@ -211,7 +221,7 @@ Four review layers run over every plan before you see it. They look at different
 
 </details>
 
-**Two rules over the top.** 12 phrases can never appear in a plan — "spot reduce", "boosts testosterone", "burns belly fat", "detox" and others. And 23 sections are required, so if the supplements or the warm-up go missing, the plan is rejected rather than delivered short.
+**Two rules over the top.** 12 phrases can never appear in a plan — "spot reduce", "boosts testosterone", "burns belly fat", "detox" and others. And 26 sections are required, so if the supplements or the warm-up go missing, the plan is rejected rather than delivered short.
 
 ### What that looks like
 
@@ -337,22 +347,25 @@ Built separately they contradict. An earlier version put the diet break in week 
 
 | File | What is in it |
 |---|---|
-| `physio.py` | Calories, protein, recovery, volume, injuries, hormones, the 20 required questions |
+| `physio.py` | Calories, protein, recovery, volume, injuries, hormones, energy availability, the 26 required questions |
 | `coherence.py` | Whether a meal is a meal and a session can be done |
 | `blocks.py` | The 24 week calendar, and making eating follow training |
-| `contract.py` | The 23 sections a plan must have |
+| `contract.py` | The 26 sections a plan must have |
 | `myths.py` | Answers to 19 claims; 12 phrases that can never be printed |
 | `severity.py` | How bad a problem is, and therefore which one gets fixed first |
 | `audit.py` | Runs every check |
 | `render.py` | Writes the document |
 | `SKILL.md` | What Claude follows to run all of it |
-| `data/` | Food and exercise lists. Swap these, not the code |
+| `ledger.py` | Every decision, why it was made, and which rule made it |
+| `units.py` | Quantities into words, and the printed arithmetic |
+| `topdf.py` | The markdown plan into a PDF |
+| `data/` | Food, exercise and activity lists. Swap these, not the code |
 
 ## ✅ Two kinds of check
 
 Early versions only asked *is this number allowed*. None asked *is this section even here*. Wrong numbers were caught; missing sections were not. Supplements disappeared between two drafts. The warm-up was never written down.
 
-`contract.py` fixes it: 23 required sections, each with a test that removes it and confirms the plan gets rejected.
+`contract.py` fixes it: 26 required sections, each with a test that removes it and confirms the plan gets rejected.
 
 ## 🧪 Tests
 
@@ -364,9 +377,10 @@ Most exist because something was already broken when it shipped.
 
 ## ⚠️ What it does not handle
 
-- Body fat is estimated from a measuring tape, so it is rough.
+- Body fat and fat-free mass are estimated from a measuring tape, so they are rough. The energy-availability figure is built on that estimate and prints its own error alongside it.
+- Strength is never known. The plan carries sets and reps, never a weight, so nothing can object to a weight that is too heavy. From 65 the rep range is capped instead, because a low-rep set is near-maximal whatever is on the bar.
 - Alcohol, eating out, and social meals are not in it.
-- Medication and medical conditions are not in it. Thyroid problems, insulin resistance and several common drugs change everything here, and it cannot see any of them.
+- Medication and medical conditions are asked for and passed on as referrals, not planned around. Thyroid problems, insulin resistance and several common drugs change everything here, and the engine has no rules for any of them — it says so and tells you to see a clinician rather than guessing.
 - How much you like a food is a guess until you replace it with your own rating.
 - Variety is not checked. A check existed but assumed a seven-day rotation, and the plan models two day types, so it flagged an identical breakfast on two training days as monotony. It was deleted rather than left dead. Rotating within dal and sabji is offered in the plan; nothing enforces it.
 
